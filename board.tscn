@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://bw0pevh1wrku7"]
+
+[ext_resource type="Script" path="res://board.gd" id="1_kihd4"]
+[ext_resource type="PackedScene" uid="uid://cc42x4ettus52" path="res://square.tscn" id="2_6wsdm"]
+
+[node name="board" type="Node3D"]
+script = ExtResource("1_kihd4")
+square_template = ExtResource("2_6wsdm")

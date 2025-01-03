@@ -1,0 +1,57 @@
+[gd_scene load_steps=9 format=3 uid="uid://c10jyjqno4uob"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_c5b25"]
+[ext_resource type="PackedScene" uid="uid://bw0pevh1wrku7" path="res://board.tscn" id="1_n0yl5"]
+[ext_resource type="PackedScene" uid="uid://bqh63lsartdci" path="res://piece.tscn" id="2_cg80l"]
+[ext_resource type="Script" path="res://addons/orbit-controls/orbit-controls.gd" id="2_umqhd"]
+[ext_resource type="Shader" path="res://environment_shaders/star_field.gdshader" id="5_8ys2h"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cxyr4"]
+shader = ExtResource("5_8ys2h")
+shader_parameter/sky_color = Color(0.03, 0.05, 0.11, 1)
+shader_parameter/star_base_color = Color(0.8, 1, 0.3, 1)
+shader_parameter/star_hue_offset = 0.6
+shader_parameter/star_intensity = 0.08
+shader_parameter/star_twinkle_speed = 0.8
+shader_parameter/star_twinkle_intensity = 0.2
+shader_parameter/layer_scale = 20.0
+shader_parameter/layer_scale_step = 10.0
+shader_parameter/layers_count = 3
+
+[sub_resource type="Sky" id="Sky_re0sg"]
+sky_material = SubResource("ShaderMaterial_cxyr4")
+
+[sub_resource type="Environment" id="Environment_dgw04"]
+background_mode = 2
+sky = SubResource("Sky_re0sg")
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_sky_contribution = 0.8
+reflected_light_source = 2
+tonemap_mode = 3
+
+[node name="main" type="Node3D"]
+script = ExtResource("1_c5b25")
+piece_template = ExtResource("2_cg80l")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.10557, 0.994412, 0, -0.994412, 0.10557, 0, 4.90681, 1.02119)
+light_energy = 0.5
+
+[node name="DirectionalLight3D2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.399, 0)
+light_energy = 0.5
+light_indirect_energy = 0.443
+light_volumetric_fog_energy = 0.722
+omni_range = 28.6753
+
+[node name="board" parent="." instance=ExtResource("1_n0yl5")]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.62359, 7.5636)
+
+[node name="OrbitControls" type="Node3D" parent="."]
+script = ExtResource("2_umqhd")
+_camera = NodePath("../Camera3D")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_dgw04")
