@@ -1,4 +1,7 @@
 extends Node
+var initial_piece_state = []
+
+var piece_list = []
 
 func translate(column, row):
 	var x = -('a'.unicode_at(0)-column.unicode_at(0)+4) + 0.5
@@ -14,7 +17,6 @@ enum PIECE_TYPE {
 	king
 }
 
-var piece_list = []
 
 var game_state = {
 	'is_white_turn': true,
@@ -39,10 +41,14 @@ func check_capture(notation):
 			Global.piece_list.remove_at(i)
 			break
 
-# initial state of the pieces
-var initial_piece_state = []
+
+
 # this is supposed to be retrieved in the handshake
 func server_hand_shake():
+	
+	# initial state of the pieces
+	initial_piece_state = []
+	piece_list = []
 	# pawns
 	for i in range(8):
 		initial_piece_state.append_array(

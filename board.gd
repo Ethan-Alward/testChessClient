@@ -2,8 +2,7 @@ extends Node3D
 
 @export var square_template: PackedScene
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
+func start():
 	# Generate the board
 	var isStartLight = false
 	for col in 8:
@@ -20,7 +19,3 @@ func _ready() -> void:
 			isLight = !isLight
 			add_child(s)
 		isStartLight = !isStartLight
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass

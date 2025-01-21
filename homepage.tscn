@@ -1,0 +1,98 @@
+[gd_scene load_steps=7 format=3 uid="uid://b76t5w5hsemhq"]
+
+[sub_resource type="GDScript" id="GDScript_xqvbq"]
+script/source = "extends Control
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass
+"
+
+[sub_resource type="Gradient" id="Gradient_gvrd5"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ioo0a"]
+gradient = SubResource("Gradient_gvrd5")
+fill_to = Vector2(0, 0)
+
+[sub_resource type="Theme" id="Theme_3eibr"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3b1mc"]
+bg_color = Color(0.396889, 0.396889, 0.396889, 1)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_uc8x3"]
+
+[node name="Homepage" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -232.0
+offset_top = 24.0
+offset_right = -232.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_xqvbq")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -323.0
+offset_top = -286.0
+offset_right = 337.0
+offset_bottom = 286.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_ioo0a")
+
+[node name="Title" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 18.0
+offset_right = 662.0
+offset_bottom = 74.0
+theme_override_font_sizes/font_size = 40
+text = "Tri-Dimensional Chess"
+horizontal_alignment = 1
+
+[node name="Sub-Title" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 155.0
+offset_top = 82.0
+offset_right = 491.0
+offset_bottom = 121.0
+text = "A Game Out of This World!"
+horizontal_alignment = 1
+
+[node name="Guest" type="Button" parent="NinePatchRect"]
+offset_left = 147.0
+offset_top = 202.0
+offset_right = 299.0
+offset_bottom = 321.0
+theme_override_colors/icon_normal_color = Color(0.197937, 0.197937, 0.197937, 1)
+theme_override_colors/icon_pressed_color = Color(0.637843, 0.637843, 0.637843, 1)
+theme_override_colors/icon_hover_color = Color(0.639216, 0.639216, 0.639216, 1)
+toggle_mode = true
+text = "Guest"
+
+[node name="Regular" type="Button" parent="NinePatchRect"]
+offset_left = 387.0
+offset_top = 202.0
+offset_right = 539.0
+offset_bottom = 313.0
+theme = SubResource("Theme_3eibr")
+theme_override_styles/focus = SubResource("StyleBoxFlat_3b1mc")
+toggle_mode = true
+text = "Regular
+"
+icon = SubResource("PlaceholderTexture2D_uc8x3")

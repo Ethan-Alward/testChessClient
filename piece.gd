@@ -36,9 +36,6 @@ func _ready() -> void:
 	mesh.is_light = is_white
 	add_child(mesh)
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
 
 func move_to(notation):
 	Global.check_capture(notation)

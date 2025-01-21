@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://c10jyjqno4uob"]
+[gd_scene load_steps=10 format=3 uid="uid://c10jyjqno4uob"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_c5b25"]
 [ext_resource type="PackedScene" uid="uid://bw0pevh1wrku7" path="res://board.tscn" id="1_n0yl5"]
 [ext_resource type="PackedScene" uid="uid://bqh63lsartdci" path="res://piece.tscn" id="2_cg80l"]
 [ext_resource type="Script" path="res://addons/orbit-controls/orbit-controls.gd" id="2_umqhd"]
 [ext_resource type="Shader" path="res://environment_shaders/star_field.gdshader" id="5_8ys2h"]
+[ext_resource type="Script" path="res://nine_patch_rect_2.gd" id="6_18ftb"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_cxyr4"]
 shader = ExtResource("5_8ys2h")
@@ -55,3 +56,192 @@ _camera = NodePath("../Camera3D")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_dgw04")
+
+[node name="Homepage" type="NinePatchRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -330.0
+offset_top = -286.0
+offset_right = 330.0
+offset_bottom = 286.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("6_18ftb")
+
+[node name="Title" type="Label" parent="Homepage"]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 18.0
+offset_right = 662.0
+offset_bottom = 74.0
+theme_override_font_sizes/font_size = 40
+text = "Tri-Dimensional Chess"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Homepage"]
+visible = false
+layout_mode = 0
+offset_left = 155.0
+offset_top = 82.0
+offset_right = 491.0
+offset_bottom = 121.0
+text = "A Game Out of This World!"
+horizontal_alignment = 1
+
+[node name="Guest" type="Button" parent="Homepage"]
+layout_mode = 0
+offset_left = 108.0
+offset_top = 145.0
+offset_right = 302.0
+offset_bottom = 317.0
+theme_override_colors/icon_normal_color = Color(0.197937, 0.197937, 0.197937, 1)
+theme_override_colors/icon_pressed_color = Color(0.637843, 0.637843, 0.637843, 1)
+theme_override_colors/icon_hover_color = Color(0.639216, 0.639216, 0.639216, 1)
+toggle_mode = true
+text = "Guest"
+
+[node name="Regular" type="Button" parent="Homepage"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 29.0
+offset_top = -141.0
+offset_right = 223.0
+offset_bottom = 31.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/icon_normal_color = Color(0.197937, 0.197937, 0.197937, 1)
+theme_override_colors/icon_pressed_color = Color(0.637843, 0.637843, 0.637843, 1)
+theme_override_colors/icon_hover_color = Color(0.639216, 0.639216, 0.639216, 1)
+toggle_mode = true
+text = "Regular
+"
+
+[node name="Back" type="Button" parent="Homepage"]
+layout_mode = 0
+offset_left = 281.0
+offset_top = 522.0
+offset_right = 379.0
+offset_bottom = 562.0
+text = "Back"
+
+[node name="New" type="Button" parent="Homepage"]
+layout_mode = 0
+offset_left = 360.0
+offset_top = 146.0
+offset_right = 554.0
+offset_bottom = 318.0
+theme_override_colors/icon_normal_color = Color(0.197937, 0.197937, 0.197937, 1)
+theme_override_colors/icon_pressed_color = Color(0.637843, 0.637843, 0.637843, 1)
+theme_override_colors/icon_hover_color = Color(0.639216, 0.639216, 0.639216, 1)
+toggle_mode = true
+text = "New"
+
+[node name="Join" type="Button" parent="Homepage"]
+layout_mode = 0
+offset_left = 108.0
+offset_top = 145.0
+offset_right = 302.0
+offset_bottom = 317.0
+theme_override_colors/icon_normal_color = Color(0.197937, 0.197937, 0.197937, 1)
+theme_override_colors/icon_pressed_color = Color(0.637843, 0.637843, 0.637843, 1)
+theme_override_colors/icon_hover_color = Color(0.639216, 0.639216, 0.639216, 1)
+toggle_mode = true
+text = "Join"
+
+[node name="EnterCode" type="Label" parent="Homepage"]
+layout_mode = 0
+offset_left = 196.0
+offset_top = 198.0
+offset_right = 465.0
+offset_bottom = 221.0
+text = "Please enter the 4 digit code below"
+
+[node name="Play" type="Button" parent="Homepage"]
+layout_mode = 0
+offset_left = 231.0
+offset_top = 326.0
+offset_right = 426.0
+offset_bottom = 415.0
+text = "Play!"
+
+[node name="Time" type="OptionButton" parent="Homepage"]
+layout_mode = 0
+offset_left = 251.0
+offset_top = 219.0
+offset_right = 391.0
+offset_bottom = 277.0
+tooltip_text = "Time"
+item_count = 3
+popup/item_0/text = "10 Minute"
+popup/item_1/text = "3 Minute"
+popup/item_1/id = 1
+popup/item_2/text = "No Time Limit"
+popup/item_2/id = 2
+
+[node name="TimeControlText" type="Label" parent="Homepage"]
+layout_mode = 0
+offset_left = 198.0
+offset_top = 184.0
+offset_right = 452.0
+offset_bottom = 207.0
+text = "Enter Desired Time Conrol Below"
+
+[node name="CodeTextBox" type="LineEdit" parent="Homepage"]
+layout_mode = 0
+offset_left = 272.0
+offset_top = 249.0
+offset_right = 392.0
+offset_bottom = 316.0
+theme_override_font_sizes/font_size = 30
+placeholder_text = "####"
+
+[node name="GameControls" type="NinePatchRect" parent="."]
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -243.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="CodeLabel" type="Label" parent="GameControls"]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 21.0
+offset_right = 62.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 30
+text = "Code: "
+
+[node name="OpponentLabel" type="Label" parent="GameControls"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 82.0
+offset_right = 203.0
+offset_bottom = 183.0
+theme_override_font_sizes/font_size = 10
+text = "Opp ID: "
+
+[node name="LeaveButton" type="Button" parent="GameControls"]
+layout_mode = 0
+offset_left = 65.0
+offset_top = 198.0
+offset_right = 175.0
+offset_bottom = 248.0
+text = "Leave Game"
+
+[connection signal="pressed" from="Homepage/Guest" to="Homepage" method="_on_guest_pressed"]
+[connection signal="pressed" from="Homepage/Regular" to="Homepage" method="_on_regular_pressed"]
+[connection signal="pressed" from="Homepage/Back" to="Homepage" method="_on_back_pressed"]
+[connection signal="pressed" from="Homepage/New" to="Homepage" method="_on_new_pressed"]
+[connection signal="pressed" from="Homepage/Join" to="Homepage" method="_on_join_pressed"]
+[connection signal="pressed" from="Homepage/Play" to="Homepage" method="_on_play_pressed"]
+[connection signal="text_changed" from="Homepage/CodeTextBox" to="Homepage" method="_on_code_text_box_text_changed"]
+[connection signal="pressed" from="GameControls/LeaveButton" to="." method="_on_leave_button_pressed"]
