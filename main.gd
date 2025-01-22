@@ -40,14 +40,19 @@ func _ready() -> void:
 	print("Connecting To Server ...")
 	
 	multiplayer_peer = ENetMultiplayerPeer.new()
-	ip = "127.0.0.1"
-	#var ip : String =  "ec2-3-15-154-232.us-east-2.compute.amazonaws.com"
+	#ip = "127.0.0.1"
+	ip = "ec2-18-224-56-186.us-east-2.compute.amazonaws.com"
 	
 	multiplayer_peer.create_client(ip, PORT)
+	
+	
 	multiplayer.multiplayer_peer = multiplayer_peer
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
-	get_tree().set_multiplayer(multiplayer_peer, "/root/main")
+	print("connection status: %s" %multiplayer_peer.get_connection_status())
+	print(MultiplayerPeer.CONNECTION_CONNECTED)
+	
+	#get_tree().set_multiplayer(multiplayer_peer, "/root/main")
 	myID = multiplayer_peer.get_unique_id()
 	print("My userId is ", myID)
 	
@@ -80,11 +85,11 @@ func joinTheGame(gameCode):
 func joinGame(_id, _code):
 	pass
 
-func newGame(): 
-	
+func newGame(): 	
 	print("NEW GAME")
-	print(myID)
+	#print(myID)
 	rpc_id(1, "createNewGame", myID)
+	#createNewGame.rpc(myID)
 
 	
 
