@@ -15,9 +15,6 @@ func _ready() -> void:
 	else:
 		$MeshInstance3D.material_override = preload("res://black_square_material.tres")
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
 
 func set_notation(col, r):
 	notation.column = col

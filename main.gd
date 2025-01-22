@@ -9,10 +9,10 @@ var ip
 const PORT = 9010
 
 #Game Data
-var code = 0
-var myID = 0
-var oppId = 0
-var gameID = 0
+var code 
+var myID 
+var oppId 
+var gameID
 var iAmWhitePieces
 var myTurn
 
@@ -31,6 +31,12 @@ var leaveButton
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:	
+	
+	code = 0
+	myID = 0
+	oppId = 0
+	gameID = 0
+	
 	print("Connecting To Server ...")
 	
 	multiplayer_peer = ENetMultiplayerPeer.new()
@@ -48,8 +54,9 @@ func _ready() -> void:
 	inGame = false
 	
 	homepage = $Homepage
-	homepage.joinGame.connect(joinGame.bind())
-	homepage.newGame.connect(newGame.bind())
+	homepage.connect("joinGame", joinTheGame.bind())
+	homepage.connect("newGame", newGame.bind())
+	#homepage.newGame.connect(newGame.bind())
 	
 	gameControls = $GameControls
 	leaveButton = $GameControls/LeaveButton
@@ -60,20 +67,25 @@ func _ready() -> void:
 	leaveButton.visible = false
 	
 	
-@rpc
-func joinGame(code):
-	print("Joinnnning")
-	inGame = true
-	joinGame.rpc(myID, code)	
-	#startGame()
+	
+	
 
+func joinTheGame(gameCode):
+	print("Joinnnning")	
+	joinGame.rpc(myID, gameCode)	
+	code = gameCode
+	
 
+@rpc("any_peer")
+func joinGame(_id, _code):
+	pass
 
 func newGame(): 
-	startGame()
+	
 	print("NEW GAME")
-	#wait for second person to join game to start game 
-	createNewGame.rpc(myID)
+	print(myID)
+	rpc_id(1, "createNewGame", myID)
+
 	
 
 
@@ -90,9 +102,9 @@ func createNewGame(_userID):
 	pass
 	
 @rpc
-func startGame(): 
-	
+func startGame(): 	
 	print("game started from server call")
+	inGame = true
 	
 	#set up board
 	Global.server_hand_shake()
@@ -109,7 +121,8 @@ func startGame():
 	codeLabel.visible = true
 	oppLabel.visible = true
 	leaveButton.visible = true
-		
+	oppLabel.text = "oppenent's ID: %s" %oppId
+	codeLabel.text = "Code: %s" %code
 
 func endGame(): 
 	inGame = false
@@ -160,8 +173,6 @@ func _process(_delta: float) -> void:
 							
 					var piece = Global.check_square(squareIWannaGoTO.get_notation())
 					if piece and myTurn:
-						#print("selected piece: ")
-						#print(piece)
 						Global.game_state.selected_piece = piece
 						piece.get_legal_moves()
 					else:
@@ -177,10 +188,7 @@ func is_legal(square, legal_moves):
 	return false
 
 	
-@rpc("any_peer")
-func serverIsLegal(_oppID, _square, _piece):
-	pass
-	
+
 @rpc("any_peer") #when server runs this it makes the opponents move appear on your screen
 func sendOppMove(square, pieceInfo):
 	myTurn = true
@@ -224,3 +232,8 @@ func _on_server_disconnected():
 
 func _on_leave_button_pressed() -> void:
 	endGame()
+	
+@rpc("any_peer")
+func serverIsLegal(_oppID, _square, _piece):
+	pass
+	

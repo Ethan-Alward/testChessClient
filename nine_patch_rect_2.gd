@@ -16,7 +16,7 @@ extends NinePatchRect
 
 var code: String
 var newOrJoin : String
-signal joinGame
+signal joinGame(code)
 signal newGame
 
 
@@ -97,7 +97,7 @@ func _on_play_pressed() -> void:
 	#try joining the game
 	
 	if newOrJoin == "join": 
-		emit_signal("joinGame", code)
+		joinGame.emit(code)
 	else: 
 		newGame.emit()
 	
