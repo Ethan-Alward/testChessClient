@@ -177,7 +177,7 @@ func _process(_delta: float) -> void:
 							myTurn = false
 							
 					var piece = Global.check_square(squareIWannaGoTO.get_notation())
-					if piece and myTurn:
+					if piece and (piece.is_white==Global.game_state.player_color) and myTurn:
 						Global.game_state.selected_piece = piece
 						piece.get_legal_moves()
 					else:

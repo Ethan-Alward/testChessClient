@@ -20,7 +20,8 @@ enum PIECE_TYPE {
 
 var game_state = {
 	'is_white_turn': true,
-	'selected_piece': null
+	'selected_piece': null,
+	'player_color': null,
 }
 
 func check_square(notation):
