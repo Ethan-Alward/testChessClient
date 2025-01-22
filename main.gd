@@ -221,6 +221,7 @@ func sync_player_list(updated_connected_peer_ids):
 @rpc
 func isMyTurn(x):
 	myTurn = x
+	Global.game_state.player_color = x
 	if x:
 		iAmWhitePieces = true
 		print("I am the white pieces wooooo")
