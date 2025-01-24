@@ -17,13 +17,14 @@ extends NinePatchRect
 @onready var NameConfirm = $NameConfirm
 @onready var NoNameEntered = $NoNameEntered
 
+
  
 var code: String
 var theName : String
 var newOrJoin : String
 signal joinGame(code)
 signal newGame
-signal username(theName)
+signal theUsername(theName)
 
 
 #4. give user the ability to resign / leave game	
@@ -44,6 +45,7 @@ func _ready() -> void:
 	NameBox.visible = false
 	NameConfirm.visible = false
 	NoNameEntered.visible = false
+
 	
 	GuestButton.visible = true
 	RegularButton.visible = true
@@ -61,6 +63,7 @@ func _on_guest_pressed() -> void:
 	NameBox.visible = true
 	NameLabel.visible = true
 	NameConfirm.visible = true
+	
 	
 	
 func _on_regular_pressed() -> void:
@@ -113,14 +116,14 @@ func _on_new_pressed() -> void:
 
 func _on_play_pressed() -> void:
 	#try joining the game
-	
+	theUsername.emit(theName)
 	if newOrJoin == "join": 
 		joinGame.emit(code)
 		
 	else: 
 		newGame.emit()
 		
-	username.emit(theName)
+
 	
 	NewButton.visible = false
 	JoinButton.visible = false

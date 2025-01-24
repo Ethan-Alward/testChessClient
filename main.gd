@@ -12,6 +12,7 @@ const PORT = 9010
 var code 
 var myID 
 var oppId 
+var oppName
 var gameID
 var iAmWhitePieces
 var myTurn
@@ -27,6 +28,7 @@ var inGame
 var gameControls
 var codeLabel
 var oppLabel
+var myPiecesLabel
 var leaveButton
 
 
@@ -58,33 +60,37 @@ func _ready() -> void:
 	homepage = $Homepage
 	homepage.connect("joinGame", joinTheGame.bind())
 	homepage.connect("newGame", newGame.bind())
-	homepage.connect("username", username.bind())
+	homepage.connect("theUsername", theUsernamePasser.bind())
 	#homepage.newGame.connect(newGame.bind())
 	
 	gameControls = $GameControls
 	leaveButton = $GameControls/LeaveButton
 	codeLabel = $GameControls/CodeLabel
+	myPiecesLabel = $GameControls/MyPiecesLabel
 	oppLabel = $GameControls/OpponentLabel
+	
+	
 	codeLabel.visible = false
 	oppLabel.visible = false
 	leaveButton.visible = false
+	myPiecesLabel.visible = false
+	$GameControls/MyTurnLabel.visible = false
+	$GameControls/MyNameLabel.visible = false
 	
-	
-	
+	theUsername = "test"
 	
 
 func joinTheGame(gameCode):
 	print("Joinnnning")	
-	joinGame.rpc(myID, gameCode)	
+	joinGame.rpc(myID, gameCode, theUsername)	
 	code = gameCode
 	
 
 
 func newGame(): 	
 	print("NEW GAME")
-	#print(myID)
-	rpc_id(1, "createNewGame", myID)
-	#createNewGame.rpc(myID)
+	rpc_id(1, "createNewGame", myID, theUsername)
+
 
 	
 
@@ -93,7 +99,6 @@ func newGame():
 func getCode(gameCode):
 	code = gameCode
 	print(code)
-	#startGame()
 	codeLabel.text = "Code: %s" %code 
 
 	
@@ -103,6 +108,7 @@ func startGame():
 	print("game started from server call")
 	inGame = true
 	
+	$GameControls/MyNameLabel.text = theUsername
 	#set up board
 	Global.server_hand_shake()
 	get_node("board").start()
@@ -114,11 +120,17 @@ func startGame():
 		piece.set_square(p.square)
 		Global.piece_list.push_front(piece)
 		add_child(piece)
-		
+	
+
+	$GameControls.visible = true
 	codeLabel.visible = true
 	oppLabel.visible = true
 	leaveButton.visible = true
-	oppLabel.text = "oppenent's ID: %s" %oppId
+	myPiecesLabel.visible = true
+	$GameControls/MyTurnLabel.visible = true
+	$GameControls/MyNameLabel.visible = true
+	
+	oppLabel.text = "oppenent's name: %s" %oppName
 	codeLabel.text = "Code: %s" %code
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -175,6 +187,8 @@ func is_legal(square, legal_moves):
 @rpc("any_peer") #when server runs this it makes the opponents move appear on your screen
 func sendOppMove(square, pieceInfo):
 	myTurn = true
+	$GameControls/MyTurnLabel.text = "It is your turn!"
+	
 	var piece2 = Global.check_square(pieceInfo["square"])
 	Global.game_state.selected_piece = piece2
 	piece2.get_legal_moves() #maybe not needed
@@ -183,12 +197,11 @@ func sendOppMove(square, pieceInfo):
 
 
 @rpc("any_peer") #when connected to an opponent tell them the opps id
-func connectToOpp(opponentId):
+func connectToOpp(opponentId, oppsName):
 	oppId = opponentId
-	oppLabel.text = "oppenent's ID: %s" %oppId
+	oppName = oppsName
+	oppLabel.text = "you are playing against: %s" %oppName
 	print("Currently playing against: " + str(oppId))
-
-
 
 
 @rpc
@@ -202,10 +215,12 @@ func isMyTurn(x):
 	Global.game_state.player_color = x
 	if x:
 		iAmWhitePieces = true
-		print("I am the white pieces wooooo")
+		myPiecesLabel.text = "You are the white pieces" 
+		$GameControls/MyTurnLabel.text = "It is your turn!"
 	else:
 		iAmWhitePieces = false
-		print("I am the black pieces boooo")
+		myPiecesLabel.text = "You are the black pieces" 
+		$GameControls/MyTurnLabel.text = "not your turn yet.."
 		
 		
 func _on_server_disconnected():
@@ -218,27 +233,22 @@ func _on_server_disconnected():
 func endGame(): 
 	inGame = false
 	print("about to end game")
-	#for child in get_tree().get_root().get_children():
-		#
-		#child.queue_free()
-	#remove board	
+	
+	#delete board
 	var board = $board
 	for child in board.get_children():
 		child.queue_free()
 	#
-	##remove pieces/reset piece arrays to initial state
-	var global = $"/root/Global"
-	for child in global.get_children():
-		child.queue_free()
+	#delete something
+	#var global = $"/root/Global"
+	#for child in global.get_children():
+		#child.queue_free()
 		
 	Global.deletePieces()
 	oppId = 0
 	gameID = 0
 	code = 0
 	
-	
-	#set homepage up
-	print("eng game")
 	homepage._ready()	
 	
 @rpc("any_peer")
@@ -248,6 +258,11 @@ func oppDisconnected():
 	#oppDisconnected display
 	$DiconnectedDisplay/ColorRect.visible = true
 
+func theUsernamePasser(theName):
+	print("passing username into func")
+	theUsername = theName
+	print(theUsername)
+	
 
 func _on_leave_button_pressed() -> void:
 	endGame()
@@ -267,17 +282,11 @@ func serverIsLegal(_oppID, _square, _piece):
 func leftGame(_myID, _gameID):
 	pass
 	
-
-
 @rpc("any_peer")
 func createNewGame(_userID):
-	pass
-	
+	pass	
 
 @rpc("any_peer")
-func joinGame(_id, _code):
+func joinGame(_id, _code, _name):
 	pass
-
-
-func username(theName):
-	theUsername = theName
+	

@@ -260,46 +260,29 @@ text = "Code: "
 
 [node name="OpponentLabel" type="Label" parent="GameControls"]
 layout_mode = 0
-offset_left = 31.0
-offset_top = 117.0
-offset_right = 227.0
-offset_bottom = 152.0
+offset_left = 18.0
+offset_top = 82.0
+offset_right = 203.0
+offset_bottom = 183.0
 theme_override_font_sizes/font_size = 10
 text = "Oppnent Name: "
 
 [node name="LeaveButton" type="Button" parent="GameControls"]
 layout_mode = 0
-offset_left = 75.0
-offset_top = 258.0
-offset_right = 185.0
-offset_bottom = 308.0
+offset_left = 65.0
+offset_top = 198.0
+offset_right = 175.0
+offset_bottom = 248.0
 text = "Leave Game"
 
 [node name="MyPiecesLabel" type="Label" parent="GameControls"]
 layout_mode = 0
-offset_left = 47.0
-offset_top = 172.0
-offset_right = 202.0
-offset_bottom = 195.0
+offset_right = 40.0
+offset_bottom = 23.0
 text = "You are the x pieces"
 
-[node name="MyTurnLabel" type="Label" parent="GameControls"]
-layout_mode = 0
-offset_left = 79.0
-offset_top = 217.0
-offset_right = 189.0
-offset_bottom = 240.0
-text = "It is your turn!"
-
-[node name="MyNameLabel" type="Label" parent="GameControls"]
-layout_mode = 0
-offset_left = 23.0
-offset_top = 72.0
-offset_right = 110.0
-offset_bottom = 104.0
-text = "Name: "
-
 [node name="DiconnectedDisplay" type="NinePatchRect" parent="."]
+visible = false
 offset_left = 3.0
 offset_top = 1.0
 offset_right = 1155.0
