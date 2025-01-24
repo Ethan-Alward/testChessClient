@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://c10jyjqno4uob"]
+[gd_scene load_steps=11 format=3 uid="uid://c10jyjqno4uob"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_c5b25"]
 [ext_resource type="PackedScene" uid="uid://bw0pevh1wrku7" path="res://board.tscn" id="1_n0yl5"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://addons/orbit-controls/orbit-controls.gd" id="2_umqhd"]
 [ext_resource type="Shader" path="res://environment_shaders/star_field.gdshader" id="5_8ys2h"]
 [ext_resource type="Script" path="res://nine_patch_rect_2.gd" id="6_18ftb"]
+[ext_resource type="Script" path="res://diconnected_display.gd" id="7_jvh5b"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_cxyr4"]
 shader = ExtResource("5_8ys2h")
@@ -82,7 +83,6 @@ text = "Tri-Dimensional Chess"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Homepage"]
-visible = false
 layout_mode = 0
 offset_left = 155.0
 offset_top = 82.0
@@ -202,6 +202,44 @@ offset_bottom = 316.0
 theme_override_font_sizes/font_size = 30
 placeholder_text = "####"
 
+[node name="NameBox" type="LineEdit" parent="Homepage"]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 244.0
+offset_right = 412.0
+offset_bottom = 307.0
+placeholder_text = "Spock"
+
+[node name="NameLabel" type="Label" parent="Homepage"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -124.0
+offset_top = 178.0
+offset_right = 118.0
+offset_bottom = 229.0
+grow_horizontal = 2
+text = "Enter Your Name Below"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameConfirm" type="Button" parent="Homepage"]
+layout_mode = 0
+offset_left = 289.0
+offset_top = 333.0
+offset_right = 360.0
+offset_bottom = 364.0
+text = "Confirm"
+
+[node name="NoNameEntered" type="Label" parent="Homepage"]
+layout_mode = 0
+offset_left = 196.0
+offset_top = 220.0
+offset_right = 470.0
+offset_bottom = 243.0
+text = "You must enter a name to continue"
+
 [node name="GameControls" type="NinePatchRect" parent="."]
 anchors_preset = 11
 anchor_left = 1.0
@@ -227,7 +265,7 @@ offset_top = 82.0
 offset_right = 203.0
 offset_bottom = 183.0
 theme_override_font_sizes/font_size = 10
-text = "Opp ID: "
+text = "Oppnent Name: "
 
 [node name="LeaveButton" type="Button" parent="GameControls"]
 layout_mode = 0
@@ -237,6 +275,58 @@ offset_right = 175.0
 offset_bottom = 248.0
 text = "Leave Game"
 
+[node name="DiconnectedDisplay" type="NinePatchRect" parent="."]
+visible = false
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 1155.0
+offset_bottom = 653.0
+script = ExtResource("7_jvh5b")
+
+[node name="ColorRect" type="ColorRect" parent="DiconnectedDisplay"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -327.5
+offset_top = -192.5
+offset_right = 327.5
+offset_bottom = 192.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="DiconnectedDisplay/ColorRect"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -259.5
+offset_right = 265.5
+offset_bottom = 193.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Your Opponent Has Been Disconnected
+"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DisconnectedButton" type="Button" parent="DiconnectedDisplay/ColorRect"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -122.0
+offset_top = -46.5
+offset_right = 122.0
+offset_bottom = 46.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Return Home"
+
 [connection signal="pressed" from="Homepage/Guest" to="Homepage" method="_on_guest_pressed"]
 [connection signal="pressed" from="Homepage/Regular" to="Homepage" method="_on_regular_pressed"]
 [connection signal="pressed" from="Homepage/Back" to="Homepage" method="_on_back_pressed"]
@@ -244,4 +334,7 @@ text = "Leave Game"
 [connection signal="pressed" from="Homepage/Join" to="Homepage" method="_on_join_pressed"]
 [connection signal="pressed" from="Homepage/Play" to="Homepage" method="_on_play_pressed"]
 [connection signal="text_changed" from="Homepage/CodeTextBox" to="Homepage" method="_on_code_text_box_text_changed"]
+[connection signal="text_changed" from="Homepage/NameBox" to="Homepage" method="_on_name_box_text_changed"]
+[connection signal="pressed" from="Homepage/NameConfirm" to="Homepage" method="_on_name_confirm_pressed"]
 [connection signal="pressed" from="GameControls/LeaveButton" to="." method="_on_leave_button_pressed"]
+[connection signal="pressed" from="DiconnectedDisplay/ColorRect/DisconnectedButton" to="." method="_on_disconnected_button_pressed"]

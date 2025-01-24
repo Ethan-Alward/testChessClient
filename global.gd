@@ -42,7 +42,10 @@ func check_capture(notation):
 			Global.piece_list.remove_at(i)
 			break
 
-
+func deletePieces(): 
+	for piece in piece_list: 
+		remove_child(piece)
+		piece.queue_free()
 
 # this is supposed to be retrieved in the handshake
 func server_hand_shake():

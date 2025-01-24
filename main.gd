@@ -16,6 +16,8 @@ var gameID
 var iAmWhitePieces
 var myTurn
 
+var theUsername
+
 var squareIWannaGoTO
 var squareImOn
 
@@ -40,19 +42,14 @@ func _ready() -> void:
 	print("Connecting To Server ...")
 	
 	multiplayer_peer = ENetMultiplayerPeer.new()
-	#ip = "127.0.0.1"
-	ip = "ec2-18-224-56-186.us-east-2.compute.amazonaws.com"
+	ip = "127.0.0.1"
+	#ip = "ec2-18-224-56-186.us-east-2.compute.amazonaws.com"
 	
-	multiplayer_peer.create_client(ip, PORT)
-	
-	
+	multiplayer_peer.create_client(ip, PORT)	
 	multiplayer.multiplayer_peer = multiplayer_peer
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
-	print("connection status: %s" %multiplayer_peer.get_connection_status())
-	print(MultiplayerPeer.CONNECTION_CONNECTED)
 	
-	#get_tree().set_multiplayer(multiplayer_peer, "/root/main")
 	myID = multiplayer_peer.get_unique_id()
 	print("My userId is ", myID)
 	
@@ -61,6 +58,7 @@ func _ready() -> void:
 	homepage = $Homepage
 	homepage.connect("joinGame", joinTheGame.bind())
 	homepage.connect("newGame", newGame.bind())
+	homepage.connect("username", username.bind())
 	#homepage.newGame.connect(newGame.bind())
 	
 	gameControls = $GameControls
@@ -81,9 +79,6 @@ func joinTheGame(gameCode):
 	code = gameCode
 	
 
-@rpc("any_peer")
-func joinGame(_id, _code):
-	pass
 
 func newGame(): 	
 	print("NEW GAME")
@@ -102,10 +97,7 @@ func getCode(gameCode):
 	codeLabel.text = "Code: %s" %code 
 
 	
-@rpc("any_peer")
-func createNewGame(_userID):
-	pass
-	
+
 @rpc
 func startGame(): 	
 	print("game started from server call")
@@ -128,20 +120,6 @@ func startGame():
 	leaveButton.visible = true
 	oppLabel.text = "oppenent's ID: %s" %oppId
 	codeLabel.text = "Code: %s" %code
-
-func endGame(): 
-	inGame = false
-	#remove board	
-	var board = $board
-	for child in board.get_children():
-		child.queue_free()
-	
-	#remove pieces/reset piece arrays to initial state
-	var global = $"/root/Global"
-	for child in global.get_children():
-		child.queue_free()
-	
-	homepage._ready()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
@@ -234,12 +212,72 @@ func _on_server_disconnected():
 	multiplayer_peer.close()
 	inGame = false
 	print("Connection to server lost.")
+	
+	
+
+func endGame(): 
+	inGame = false
+	print("about to end game")
+	#for child in get_tree().get_root().get_children():
+		#
+		#child.queue_free()
+	#remove board	
+	var board = $board
+	for child in board.get_children():
+		child.queue_free()
+	#
+	##remove pieces/reset piece arrays to initial state
+	var global = $"/root/Global"
+	for child in global.get_children():
+		child.queue_free()
+		
+	Global.deletePieces()
+	oppId = 0
+	gameID = 0
+	code = 0
+	
+	
+	#set homepage up
+	print("eng game")
+	homepage._ready()	
+	
+@rpc("any_peer")
+func oppDisconnected():
+	#trigger end of game and error message
+	print("opp disconnected")
+	#oppDisconnected display
+	$DiconnectedDisplay/ColorRect.visible = true
 
 
 func _on_leave_button_pressed() -> void:
 	endGame()
+	rpc_id(1, "leftGame", myID, gameID)
+
+func _on_disconnected_button_pressed() -> void:
+	endGame()
+	$DiconnectedDisplay/ColorRect.visible = false
+
+
 	
 @rpc("any_peer")
 func serverIsLegal(_oppID, _square, _piece):
 	pass
 	
+@rpc("any_peer")
+func leftGame(_myID, _gameID):
+	pass
+	
+
+
+@rpc("any_peer")
+func createNewGame(_userID):
+	pass
+	
+
+@rpc("any_peer")
+func joinGame(_id, _code):
+	pass
+
+
+func username(theName):
+	theUsername = theName

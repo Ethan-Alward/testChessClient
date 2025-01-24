@@ -12,12 +12,18 @@ extends NinePatchRect
 @onready var TimeLabel = $TimeControlText
 @onready var Title = $Title
 @onready var Subtitle = $Subtitle
+@onready var NameBox = $NameBox
+@onready var NameLabel = $NameLabel
+@onready var NameConfirm = $NameConfirm
+@onready var NoNameEntered = $NoNameEntered
 
-
+ 
 var code: String
+var theName : String
 var newOrJoin : String
 signal joinGame(code)
 signal newGame
+signal username(theName)
 
 
 #4. give user the ability to resign / leave game	
@@ -34,18 +40,27 @@ func _ready() -> void:
 	CodeTextBox.visible = false
 	TimeDropDown.visible = false
 	TimeLabel.visible = false
+	NameLabel.visible = false
+	NameBox.visible = false
+	NameConfirm.visible = false
+	NoNameEntered.visible = false
 	
 	GuestButton.visible = true
 	RegularButton.visible = true
 	BackButton.visible = true
+	Title.visible = true
+	Subtitle.visible = true
 	
+	$/root/main/GameControls.visible = false
 	
 
 func _on_guest_pressed() -> void:
 	RegularButton.visible = false
 	GuestButton.visible = false
-	JoinButton.visible = true
-	NewButton.visible = true
+	
+	NameBox.visible = true
+	NameLabel.visible = true
+	NameConfirm.visible = true
 	
 	
 func _on_regular_pressed() -> void:
@@ -68,6 +83,9 @@ func _on_back_pressed() -> void:
 	CodeTextBox.visible = false
 	TimeDropDown.visible = false
 	TimeLabel.visible = false
+	NameBox.visible = false
+	NameLabel.visible = false
+	NameConfirm.visible = false
 	
 	
 func _on_join_pressed() -> void:
@@ -98,9 +116,11 @@ func _on_play_pressed() -> void:
 	
 	if newOrJoin == "join": 
 		joinGame.emit(code)
+		
 	else: 
 		newGame.emit()
-	
+		
+	username.emit(theName)
 	
 	NewButton.visible = false
 	JoinButton.visible = false
@@ -120,3 +140,29 @@ func _on_code_text_box_text_changed(new_text: String) -> void:
 		CodeTextBox.text = ""
 	else:
 		code = new_text
+
+
+func _on_disconnected_button_pressed() -> void:
+	pass # Replace with function body.
+
+
+func _on_name_box_text_changed(new_text: String) -> void:
+	if new_text.length() > 15:
+		NameBox.text = ""
+	else:
+		theName = new_text
+
+
+func _on_name_confirm_pressed() -> void:
+	
+	if theName.length() < 1: 
+		NoNameEntered.visible = true
+	else:
+			
+		NameBox.visible = false
+		NameLabel.visible = false
+		NameConfirm.visible = false 
+		
+		JoinButton.visible = true
+		NewButton.visible = true
+		
