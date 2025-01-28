@@ -22,6 +22,8 @@ var theUsername
 var squareIWannaGoTO
 var squareImOn
 
+var squareClicked
+
 var homepage 
 var inGame
 
@@ -41,12 +43,10 @@ func _ready() -> void:
 	oppId = 0
 	gameID = 0
 	
-	print("Connecting To Server ...")
-	
+	print("Connecting To Server ...")	
 	multiplayer_peer = ENetMultiplayerPeer.new()
 	ip = "127.0.0.1"
-	#ip = "ec2-18-224-56-186.us-east-2.compute.amazonaws.com"
-	
+	#ip = "ec2-18-224-56-186.us-east-2.compute.amazonaws.com"	
 	multiplayer_peer.create_client(ip, PORT)	
 	multiplayer.multiplayer_peer = multiplayer_peer
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
@@ -137,7 +137,7 @@ func startGame():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 
-	if inGame:	
+	if inGame && myTurn:	
 		# ray casting
 		if Input.is_action_just_pressed("click"):
 			var space_state = get_world_3d().direct_space_state
@@ -147,32 +147,61 @@ func _process(_delta: float) -> void:
 			var ray_query = PhysicsRayQueryParameters3D.create(rayOrigin, rayEnd)
 			var intersection = space_state.intersect_ray(ray_query)
 			
+			#when a square has been cliked on
 			if intersection:
-				squareIWannaGoTO = intersection["collider"].get_parent().get_parent()
-				if squareIWannaGoTO.is_in_group("square"):
-					if Global.game_state.selected_piece && myTurn:
-						squareImOn = Global.game_state.selected_piece.square
-						var legal_moves = Global.game_state.selected_piece.legal_moves
-						# If the selected piece can go to that square
-						if is_legal(squareIWannaGoTO.get_notation(), legal_moves):
-							var pieceInfo = Global.game_state.selected_piece.pieceInfo() 
+				squareClicked = intersection["collider"].get_parent().get_parent()				
+				if squareClicked.is_in_group("square"): # if is a square
+					
+					#check if square clicked has a piece on it 
+					var pieceOnSquare = Global.check_square(squareClicked.get_notation())
+					
+					#if there is a piece on it
+					if pieceOnSquare:
+						
+						#if it is my coloured piece, set it to the selected piece
+						if pieceOnSquare.is_white == iAmWhitePieces:
+							Global.game_state.selected_piece = pieceOnSquare
+							pieceOnSquare.get_legal_moves()
 							
-							#send move to server who sends it to opponent 
-							serverIsLegal.rpc(oppId,squareIWannaGoTO.get_notation(), pieceInfo)
+						else: #not my coloured piece
+							#if it is a legal move capture the piece
+							squareImOn = Global.game_state.selected_piece.square
+							var legal_moves = Global.game_state.selected_piece.legal_moves
+							# If the selected piece can go to that square
+							if is_legal(squareClicked.get_notation(), legal_moves):
+								var pieceInfo = Global.game_state.selected_piece.pieceInfo() 								
+								#send move to server who sends it to opponent 
+								serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)
+								#make move on my screen
+								Global.game_state.selected_piece.move_to(squareClicked.get_notation())					
+								myTurn = false
 							
-							#make move on my screen
-							Global.game_state.selected_piece.move_to(squareIWannaGoTO.get_notation())
-							
-							#maybe delete
-							await get_tree().create_timer(1).timeout
-							myTurn = false
-							
-					var piece = Global.check_square(squareIWannaGoTO.get_notation())
-					if piece and (piece.is_white==Global.game_state.player_color) and myTurn:
-						Global.game_state.selected_piece = piece
-						piece.get_legal_moves()
-					else:
-						Global.game_state.selected_piece = null
+					else: #there is no piece on the square
+			
+						if Global.game_state.selected_piece:
+							squareImOn = Global.game_state.selected_piece.square
+							var legal_moves = Global.game_state.selected_piece.legal_moves
+							# If the selected piece can go to that square
+							if is_legal(squareClicked.get_notation(), legal_moves):
+								var pieceInfo = Global.game_state.selected_piece.pieceInfo() 
+								
+								#send move to server who sends it to opponent 
+								serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)
+								
+								#make move on my screen
+								Global.game_state.selected_piece.move_to(squareClicked.get_notation())
+								
+								#maybe delete
+								#await get_tree().create_timer(1).timeout
+								myTurn = false
+						
+					##setting selected piece		
+					#var piece = Global.check_square(squareClicked.get_notation())
+					#if piece and (piece.is_white==Global.game_state.player_color) and myTurn:
+						#Global.game_state.selected_piece = piece
+						#piece.get_legal_moves()
+					#else:
+						#Global.game_state.selected_piece = null
 
 		
 

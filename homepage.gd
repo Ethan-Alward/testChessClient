@@ -121,6 +121,7 @@ func _on_new_pressed() -> void:
 func _on_play_pressed() -> void:
 	#try joining the game
 	theUsername.emit(theName)
+	
 	if newOrJoin == "join": 
 		if code.length() == 4: 
 			joinGame.emit(code)
