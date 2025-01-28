@@ -1,11 +1,12 @@
-[gd_scene load_steps=11 format=3 uid="uid://c10jyjqno4uob"]
+[gd_scene load_steps=16 format=3 uid="uid://c10jyjqno4uob"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_c5b25"]
 [ext_resource type="PackedScene" uid="uid://bw0pevh1wrku7" path="res://board.tscn" id="1_n0yl5"]
 [ext_resource type="PackedScene" uid="uid://bqh63lsartdci" path="res://piece.tscn" id="2_cg80l"]
 [ext_resource type="Script" path="res://addons/orbit-controls/orbit-controls.gd" id="2_umqhd"]
 [ext_resource type="Shader" path="res://environment_shaders/star_field.gdshader" id="5_8ys2h"]
-[ext_resource type="Script" path="res://nine_patch_rect_2.gd" id="6_18ftb"]
+[ext_resource type="Script" path="res://homepage.gd" id="6_18ftb"]
+[ext_resource type="Script" path="res://game_type_button.gd" id="7_fvt5g"]
 [ext_resource type="Script" path="res://diconnected_display.gd" id="7_jvh5b"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_cxyr4"]
@@ -30,6 +31,16 @@ ambient_light_color = Color(1, 1, 1, 1)
 ambient_light_sky_contribution = 0.8
 reflected_light_source = 2
 tonemap_mode = 3
+
+[sub_resource type="FontVariation" id="FontVariation_v1mjg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w6a84"]
+
+[sub_resource type="Theme" id="Theme_2nc1o"]
+/fonts/Standard = SubResource("FontVariation_v1mjg")
+/styles/Standard = SubResource("StyleBoxFlat_w6a84")
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_vtkfx"]
 
 [node name="main" type="Node3D"]
 script = ExtResource("1_c5b25")
@@ -240,7 +251,30 @@ offset_right = 470.0
 offset_bottom = 243.0
 text = "You must enter a name to continue"
 
+[node name="GameTypeButton" type="CheckButton" parent="Homepage"]
+layout_mode = 0
+offset_left = 58.0
+offset_top = 402.0
+offset_right = 475.0
+offset_bottom = 528.0
+theme = SubResource("Theme_2nc1o")
+theme_override_colors/font_disabled_color = Color(0.340339, 0.340339, 0.340339, 1)
+theme_override_colors/font_pressed_color = Color(0.95158, 0.95158, 0.95158, 1)
+theme_override_icons/checked = SubResource("CanvasTexture_vtkfx")
+text = "Standard"
+alignment = 1
+autowrap_mode = 2
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("7_fvt5g")
+
+[node name="InvalidJoinGame" type="Label" parent="Homepage"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
 [node name="GameControls" type="NinePatchRect" parent="."]
+visible = false
 anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
@@ -300,6 +334,7 @@ offset_bottom = 104.0
 text = "Name: "
 
 [node name="DiconnectedDisplay" type="NinePatchRect" parent="."]
+visible = false
 offset_left = 3.0
 offset_top = 1.0
 offset_right = 1155.0
@@ -359,5 +394,6 @@ text = "Return Home"
 [connection signal="text_changed" from="Homepage/CodeTextBox" to="Homepage" method="_on_code_text_box_text_changed"]
 [connection signal="text_changed" from="Homepage/NameBox" to="Homepage" method="_on_name_box_text_changed"]
 [connection signal="pressed" from="Homepage/NameConfirm" to="Homepage" method="_on_name_confirm_pressed"]
+[connection signal="toggled" from="Homepage/GameTypeButton" to="Homepage/GameTypeButton" method="_on_game_type_button_toggled"]
 [connection signal="pressed" from="GameControls/LeaveButton" to="." method="_on_leave_button_pressed"]
 [connection signal="pressed" from="DiconnectedDisplay/ColorRect/DisconnectedButton" to="." method="_on_disconnected_button_pressed"]

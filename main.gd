@@ -61,6 +61,7 @@ func _ready() -> void:
 	homepage.connect("joinGame", joinTheGame.bind())
 	homepage.connect("newGame", newGame.bind())
 	homepage.connect("theUsername", theUsernamePasser.bind())
+	
 	#homepage.newGame.connect(newGame.bind())
 	
 	gameControls = $GameControls
@@ -135,7 +136,7 @@ func startGame():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-		
+
 	if inGame:	
 		# ray casting
 		if Input.is_action_just_pressed("click"):
@@ -257,6 +258,13 @@ func oppDisconnected():
 	print("opp disconnected")
 	#oppDisconnected display
 	$DiconnectedDisplay/ColorRect.visible = true
+
+@rpc("any_peer")
+func invalidJoinGame():
+	$Homepage/Subtitle.visible = false
+	$Homepage/InvalidJoinGame.text = "Game is full, please verify you have the right code or start new game"
+
+
 
 func theUsernamePasser(theName):
 	print("passing username into func")
