@@ -19,9 +19,8 @@ var myTurn
 
 var theUsername
 
-var squareIWannaGoTO
-var squareImOn
 
+var squareImOn
 var squareClicked
 
 var homepage 
@@ -109,6 +108,11 @@ func startGame():
 	print("game started from server call")
 	inGame = true
 	
+	#if iAmWhitePieces:
+		#$Camera3D.position = krjnsfbg
+	#else: 
+		#$Camera3D.position = kshjbks
+	
 	$GameControls/MyNameLabel.text = theUsername
 	#set up board
 	Global.server_hand_shake()
@@ -150,14 +154,11 @@ func _process(_delta: float) -> void:
 			#when a square has been cliked on
 			if intersection:
 				squareClicked = intersection["collider"].get_parent().get_parent()				
-				if squareClicked.is_in_group("square"): # if is a square
-					
+				if squareClicked.is_in_group("square"): # if is a square					
 					#check if square clicked has a piece on it 
-					var pieceOnSquare = Global.check_square(squareClicked.get_notation())
-					
+					var pieceOnSquare = Global.check_square(squareClicked.get_notation())					
 					#if there is a piece on it
-					if pieceOnSquare:
-						
+					if pieceOnSquare:						
 						#if it is my coloured piece, set it to the selected piece
 						if pieceOnSquare.is_white == iAmWhitePieces:
 							Global.game_state.selected_piece = pieceOnSquare
@@ -176,32 +177,20 @@ func _process(_delta: float) -> void:
 								Global.game_state.selected_piece.move_to(squareClicked.get_notation())					
 								myTurn = false
 							
-					else: #there is no piece on the square
-			
+					else: #there is no piece on the square			
 						if Global.game_state.selected_piece:
 							squareImOn = Global.game_state.selected_piece.square
 							var legal_moves = Global.game_state.selected_piece.legal_moves
 							# If the selected piece can go to that square
 							if is_legal(squareClicked.get_notation(), legal_moves):
-								var pieceInfo = Global.game_state.selected_piece.pieceInfo() 
-								
+								var pieceInfo = Global.game_state.selected_piece.pieceInfo() 								
 								#send move to server who sends it to opponent 
-								serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)
-								
+								serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)								
 								#make move on my screen
 								Global.game_state.selected_piece.move_to(squareClicked.get_notation())
-								
-								#maybe delete
-								#await get_tree().create_timer(1).timeout
 								myTurn = false
 						
-					##setting selected piece		
-					#var piece = Global.check_square(squareClicked.get_notation())
-					#if piece and (piece.is_white==Global.game_state.player_color) and myTurn:
-						#Global.game_state.selected_piece = piece
-						#piece.get_legal_moves()
-					#else:
-						#Global.game_state.selected_piece = null
+
 
 		
 
@@ -268,11 +257,6 @@ func endGame():
 	var board = $board
 	for child in board.get_children():
 		child.queue_free()
-	#
-	#delete something
-	#var global = $"/root/Global"
-	#for child in global.get_children():
-		#child.queue_free()
 		
 	Global.deletePieces()
 	oppId = 0
