@@ -22,6 +22,7 @@ var theUsername
 
 var squareImOn
 var squareClicked
+var pieceOnSquare
 
 var homepage 
 var inGame
@@ -31,6 +32,7 @@ var codeLabel
 var oppLabel
 var myPiecesLabel
 var leaveButton
+
 
 var wantsToWatch
 
@@ -158,7 +160,15 @@ func _process(_delta: float) -> void:
 				squareClicked = intersection["collider"].get_parent().get_parent()				
 				if squareClicked.is_in_group("square"): # if is a square					
 					#check if square clicked has a piece on it 
-					var pieceOnSquare = Global.check_square(squareClicked.get_notation())					
+					var pieceOnSquare = Global.check_square(squareClicked.get_notation())		
+					#var pieceIsOnSquare = false
+					#for x in Global.piece_list: 
+						##if the square I wanna go to has a piece on it remove it
+						#if x["square"] == squareClicked.get_notation():	
+							#pieceOnSquare = x
+							#pieceIsOnSquare = true
+							
+								
 					#if there is a piece on it
 					if pieceOnSquare:						
 						#if it is my coloured piece, set it to the selected piece
@@ -281,7 +291,10 @@ func oppDisconnected():
 	#trigger end of game and error message
 	print("opp disconnected")
 	#oppDisconnected display
+	$DiconnectedDisplay.visible = true
 	$DiconnectedDisplay/ColorRect.visible = true
+	$DiconnectedDisplay/ColorRect/DisconnectedButton.visible = true
+	$DiconnectedDisplay/ColorRect/Label.visible = true
 
 @rpc("any_peer")
 func invalidJoinGame():
