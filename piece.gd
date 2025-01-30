@@ -40,8 +40,6 @@ func _ready() -> void:
 func move_to(notation):
 	Global.check_capture(notation)
 	set_square(notation)
-	update_position()
-	num_moves = num_moves+1
 	Global.game_state.is_white_turn = !Global.game_state.is_white_turn
 
 func set_square(notation):
@@ -56,6 +54,7 @@ func update_position():
 
 func is_on(notation):
 	return Global.compare_square_notations(square, notation)
+	
 
 func get_legal_moves():
 	match type:

@@ -46,7 +46,9 @@ func _ready() -> void:
 	NameConfirm.visible = false
 	NoNameEntered.visible = false
 	GameTypeButton.visible = false
-
+	$InvalidJoinGame.visible = false
+	$YesWatch.visible = false
+	$NoWatch.visible = false
 	
 	GuestButton.visible = true
 	RegularButton.visible = true

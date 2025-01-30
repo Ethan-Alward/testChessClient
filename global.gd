@@ -44,7 +44,7 @@ func check_capture(notation):
 
 func deletePieces(): 
 	for piece in piece_list: 
-		remove_child(piece)
+		#remove_child(piece)
 		piece.queue_free()
 	
 
@@ -170,3 +170,4 @@ func server_hand_shake():
 			},
 		]
 	)
+	print(initial_piece_state)

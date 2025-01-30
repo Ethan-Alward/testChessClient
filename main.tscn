@@ -269,12 +269,37 @@ expand_icon = true
 script = ExtResource("7_fvt5g")
 
 [node name="InvalidJoinGame" type="Label" parent="Homepage"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.158
+anchor_right = 0.5
+anchor_bottom = 0.158
+offset_left = -297.0
+offset_top = 48.624
+offset_right = 333.0
+offset_bottom = 166.624
+text = "Game is full, please verify you have the right code or start new game"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="YesWatch" type="Button" parent="Homepage"]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
+offset_left = 363.0
+offset_top = 147.0
+offset_right = 552.0
+offset_bottom = 307.0
+text = "Yes"
+
+[node name="NoWatch" type="Button" parent="Homepage"]
+layout_mode = 0
+offset_left = 109.0
+offset_top = 144.0
+offset_right = 300.0
+offset_bottom = 313.0
+text = "No"
 
 [node name="GameControls" type="NinePatchRect" parent="."]
-visible = false
 anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
@@ -395,5 +420,7 @@ text = "Return Home"
 [connection signal="text_changed" from="Homepage/NameBox" to="Homepage" method="_on_name_box_text_changed"]
 [connection signal="pressed" from="Homepage/NameConfirm" to="Homepage" method="_on_name_confirm_pressed"]
 [connection signal="toggled" from="Homepage/GameTypeButton" to="Homepage/GameTypeButton" method="_on_game_type_button_toggled"]
+[connection signal="pressed" from="Homepage/YesWatch" to="." method="_on_yes_watch_pressed"]
+[connection signal="pressed" from="Homepage/NoWatch" to="." method="_on_no_watch_pressed"]
 [connection signal="pressed" from="GameControls/LeaveButton" to="." method="_on_leave_button_pressed"]
 [connection signal="pressed" from="DiconnectedDisplay/ColorRect/DisconnectedButton" to="." method="_on_disconnected_button_pressed"]

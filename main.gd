@@ -32,6 +32,8 @@ var oppLabel
 var myPiecesLabel
 var leaveButton
 
+var wantsToWatch
+
 
 
 # Called when the node enters the scene tree for the first time.
@@ -55,6 +57,7 @@ func _ready() -> void:
 	print("My userId is ", myID)
 	
 	inGame = false
+	wantsToWatch = false
 	
 	homepage = $Homepage
 	homepage.connect("joinGame", joinTheGame.bind())
@@ -77,12 +80,11 @@ func _ready() -> void:
 	$GameControls/MyTurnLabel.visible = false
 	$GameControls/MyNameLabel.visible = false
 	
-	theUsername = "test"
 	
 
 func joinTheGame(gameCode):
-	print("Joinnnning")	
-	joinGame.rpc(myID, gameCode, theUsername)	
+	wantsToWatch = false
+	joinGame.rpc(myID, gameCode, theUsername, wantsToWatch)	
 	code = gameCode
 	
 
@@ -176,6 +178,7 @@ func _process(_delta: float) -> void:
 								#make move on my screen
 								Global.game_state.selected_piece.move_to(squareClicked.get_notation())					
 								myTurn = false
+								$GameControls/MyTurnLabel.text = "It is not your turn"
 							
 					else: #there is no piece on the square			
 						if Global.game_state.selected_piece:
@@ -189,7 +192,7 @@ func _process(_delta: float) -> void:
 								#make move on my screen
 								Global.game_state.selected_piece.move_to(squareClicked.get_notation())
 								myTurn = false
-						
+								$GameControls/MyTurnLabel.text = "It is not your turn"
 
 
 		
@@ -205,14 +208,19 @@ func is_legal(square, legal_moves):
 
 @rpc("any_peer") #when server runs this it makes the opponents move appear on your screen
 func sendOppMove(square, pieceInfo):
+	#myTurn = true
+	print("sendOppmove")
+	#is there a square on piece? 	
+	#var piece = Global.check_square(pieceInfo["square"])
+	#Global.game_state.selected_piece = piece
+	##piece.get_legal_moves() #maybe not needed
+	#Global.game_state.selected_piece.move_to(square)
+	
+	Global.check_square(pieceInfo["square"]).move_to(square)
+	Global.game_state.selected_piece =  Global.check_square(pieceInfo["square"])
+	print(Global.game_state.selected_piece)
 	myTurn = true
 	$GameControls/MyTurnLabel.text = "It is your turn!"
-	
-	var piece2 = Global.check_square(pieceInfo["square"])
-	Global.game_state.selected_piece = piece2
-	piece2.get_legal_moves() #maybe not needed
-	Global.game_state.selected_piece.move_to(square)
-
 
 
 @rpc("any_peer") #when connected to an opponent tell them the opps id
@@ -275,8 +283,15 @@ func oppDisconnected():
 @rpc("any_peer")
 func invalidJoinGame():
 	$Homepage/Subtitle.visible = false
+	$Homepage/InvalidJoinGame.visible = true
 	$Homepage/InvalidJoinGame.text = "Game is full, please verify you have the right code or start new game"
 
+	$Homepage/CodeTextBox.visible = true
+	$Homepage/EnterCode.visible = true
+	$Homepage/Play.visible = true	
+	$Homepage/Back.visible = true
+	$Homepage/Title.visible = true
+	
 
 
 func theUsernamePasser(theName):
@@ -308,6 +323,21 @@ func createNewGame(_userID):
 	pass	
 
 @rpc("any_peer")
-func joinGame(_id, _code, _name):
+func joinGame(_id, _code, _name, _wannaWatch):
 	pass
+	
+
+
+func _on_no_watch_pressed() -> void:
+	wantsToWatch = false
+	$Homepage/NoWatch.visible = false
+	$Homepage/YesWatch.visible = false
+
+
+func _on_yes_watch_pressed() -> void:
+	wantsToWatch = true
+	$Homepage/NoWatch.visible = false
+	$Homepage/YesWatch.visible = false
+	joinGame.rpc(myID, code, theUsername, wantsToWatch)
+	
 	
