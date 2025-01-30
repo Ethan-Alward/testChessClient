@@ -4,7 +4,6 @@ extends Node3D
 @export var is_white: bool
 
 var piece_mesh
-
 var legal_moves = []
 
 var square = {

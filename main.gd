@@ -172,7 +172,8 @@ func _process(_delta: float) -> void:
 							var legal_moves = Global.game_state.selected_piece.legal_moves
 							# If the selected piece can go to that square
 							if is_legal(squareClicked.get_notation(), legal_moves):
-								var pieceInfo = Global.game_state.selected_piece.pieceInfo() 								
+								var pieceInfo = Global.game_state.selected_piece.pieceInfo() 	
+								print(Global.game_state.selected_piece)							
 								#send move to server who sends it to opponent 
 								serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)
 								#make move on my screen
@@ -208,17 +209,19 @@ func is_legal(square, legal_moves):
 
 @rpc("any_peer") #when server runs this it makes the opponents move appear on your screen
 func sendOppMove(square, pieceInfo):
-	#myTurn = true
-	print("sendOppmove")
-	#is there a square on piece? 	
-	#var piece = Global.check_square(pieceInfo["square"])
-	#Global.game_state.selected_piece = piece
-	##piece.get_legal_moves() #maybe not needed
-	#Global.game_state.selected_piece.move_to(square)
+	#if square has piece on it, delete the piece
+	for x in Global.piece_list: 
+		#if the square I wanna go to has a piece on it remove it
+		if x["square"] == square:	
+			#delete piece 
+			x.queue_free()
+			Global.piece_list.erase(x)
 	
-	Global.check_square(pieceInfo["square"]).move_to(square)
-	Global.game_state.selected_piece =  Global.check_square(pieceInfo["square"])
-	print(Global.game_state.selected_piece)
+		#fnd the piece being moved and move it
+		if x["square"] == pieceInfo["square"]:	
+			x.set_square(square)
+			Global.game_state.selected_piece = x	
+	
 	myTurn = true
 	$GameControls/MyTurnLabel.text = "It is your turn!"
 
