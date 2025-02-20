@@ -12,7 +12,15 @@ func pawn(is_white, curr_notation, num_moves):
 	var piece = Global.check_square(notation)
 	if !piece:
 		squares.push_front(notation)
-		# the two squares where the pawn goes to capture things
+	
+		#the first move can go up to another row
+		if num_moves==0:
+			notation = { 'column':String.chr(col), 'row':r+direction*2 }
+			piece = Global.check_square(notation)
+			if !piece:
+				squares.push_front(notation)
+	
+	# the two squares where the pawn goes to capture things
 	var a = 1
 	for i in range(2):
 		notation = { 'column':String.chr(col+a), 'row':r+direction*1 }
@@ -20,12 +28,8 @@ func pawn(is_white, curr_notation, num_moves):
 		if piece and piece.is_white != is_white:
 			squares.push_front(notation)
 		a = -1
-	# the first move can go up to another row
-	if num_moves==0:
-		notation = { 'column':String.chr(col), 'row':r+direction*2 }
-		piece = Global.check_square(notation)
-		if !piece:
-			squares.push_front(notation)
+		
+
 	return squares
 
 func collect_straight_moves(is_white, start_notation, directions):
@@ -48,6 +52,8 @@ func collect_straight_moves(is_white, start_notation, directions):
 				break
 			else:
 				result.push_back(next_notation)
+				
+	print("result: ", result)
 	return result
 
 func knight(is_white, curr_notation):
@@ -110,4 +116,5 @@ func king(is_white, curr_notation):
 		var piece = Global.check_square(check_notation)
 		if !piece or (piece.is_white != is_white):
 			moves.push_back(check_notation)
+	print("king moves: ", moves)
 	return moves

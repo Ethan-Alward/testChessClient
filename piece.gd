@@ -5,6 +5,7 @@ extends Node3D
 
 var piece_mesh
 var legal_moves = []
+var mesh
 
 var square = {
 	'column': '',
@@ -18,6 +19,7 @@ func pieceInfo():
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	#print("in piece.gd ready")
 	match type:
 		Global.PIECE_TYPE.pawn:
 			piece_mesh = load("res://peice_meshs/pawn_mesh.tscn")
@@ -31,10 +33,10 @@ func _ready() -> void:
 			piece_mesh = load("res://peice_meshs/queen_mesh.tscn")
 		Global.PIECE_TYPE.king:
 			piece_mesh = load("res://peice_meshs/king_mesh.tscn")
-	var mesh = piece_mesh.instantiate()
+	mesh = piece_mesh.instantiate()
 	mesh.is_light = is_white
 	add_child(mesh)
-
+	#print("finished piece.gd ready")
 
 func move_to(notation):
 	Global.check_capture(notation)

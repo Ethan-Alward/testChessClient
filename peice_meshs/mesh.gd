@@ -6,6 +6,7 @@ extends Node3D
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	#var direction = Vector3(1, 0, 0)
+	#print("printing get children", get_children())
 	for child in get_children():
 		if is_light:
 			outline_material = preload(("res://outline/white_outline.tres"))
@@ -19,3 +20,4 @@ func _ready() -> void:
 			outline_material.set_shader_parameter("outline_color", Color(0 / 255.0, 89 / 255.0, 255 / 255.0))
 		child.material_overlay = outline_material
 	outline_material.set_shader_parameter("outline_width", 1)
+	#print("end of mesh.gd for loop")

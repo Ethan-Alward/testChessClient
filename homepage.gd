@@ -93,6 +93,7 @@ func _on_back_pressed() -> void:
 	NameLabel.visible = false
 	NameConfirm.visible = false
 	GameTypeButton.visible = false
+	$NoNameEntered.visible = false
 	
 	
 func _on_join_pressed() -> void:

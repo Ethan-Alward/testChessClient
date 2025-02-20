@@ -170,4 +170,4 @@ func server_hand_shake():
 			},
 		]
 	)
-	print(initial_piece_state)
+	#print(initial_piece_state)

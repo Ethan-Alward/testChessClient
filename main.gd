@@ -36,6 +36,8 @@ var leaveButton
 
 var wantsToWatch
 
+var currentlySelectedPiece
+var selectedPieceOrigColour
 
 
 # Called when the node enters the scene tree for the first time.
@@ -119,17 +121,23 @@ func startGame():
 	
 	$GameControls/MyNameLabel.text = theUsername
 	#set up board
+	#print("start of server handshake")
 	Global.server_hand_shake()
+	#print("end of server handshake")
+	#print("start of board start")
 	get_node("board").start()
+	#print("end of board start")
 	
 	for p in Global.initial_piece_state:
+		#print("adding piece to piece_list")
 		var piece = piece_template.instantiate()
+		#print("setting piece type")
 		piece.type =  p.type
 		piece.is_white = p.is_white
 		piece.set_square(p.square)
 		Global.piece_list.push_front(piece)
 		add_child(piece)
-	
+		#print("piece add as child")
 
 	$GameControls.visible = true
 	codeLabel.visible = true
@@ -144,7 +152,6 @@ func startGame():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-
 	if inGame && myTurn:	
 		# ray casting
 		if Input.is_action_just_pressed("click"):
@@ -160,50 +167,30 @@ func _process(_delta: float) -> void:
 				squareClicked = intersection["collider"].get_parent().get_parent()				
 				if squareClicked.is_in_group("square"): # if is a square					
 					#check if square clicked has a piece on it 
-					var pieceOnSquare = Global.check_square(squareClicked.get_notation())		
-					#var pieceIsOnSquare = false
-					#for x in Global.piece_list: 
-						##if the square I wanna go to has a piece on it remove it
-						#if x["square"] == squareClicked.get_notation():	
-							#pieceOnSquare = x
-							#pieceIsOnSquare = true
-							
-								
+					pieceOnSquare = Global.check_square(squareClicked.get_notation())		
+				
 					#if there is a piece on it
 					if pieceOnSquare:						
 						#if it is my coloured piece, set it to the selected piece
-						if pieceOnSquare.is_white == iAmWhitePieces:
-							Global.game_state.selected_piece = pieceOnSquare
-							pieceOnSquare.get_legal_moves()
+						if pieceOnSquare.is_white == iAmWhitePieces:						
+							
+							if Global.game_state.selected_piece != null:
+								clearPotentialMoveColors()
+
+							#pieceOnSquare.get_legal_moves()
+							Global.game_state.selected_piece = pieceOnSquare	
+							Global.game_state.selected_piece.get_legal_moves()
+							setPotentialMoveColors()
+
 							
 						else: #not my coloured piece
 							#if it is a legal move capture the piece
-							squareImOn = Global.game_state.selected_piece.square
-							var legal_moves = Global.game_state.selected_piece.legal_moves
-							# If the selected piece can go to that square
-							if is_legal(squareClicked.get_notation(), legal_moves):
-								var pieceInfo = Global.game_state.selected_piece.pieceInfo() 	
-								print(Global.game_state.selected_piece)							
-								#send move to server who sends it to opponent 
-								serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)
-								#make move on my screen
-								Global.game_state.selected_piece.move_to(squareClicked.get_notation())					
-								myTurn = false
-								$GameControls/MyTurnLabel.text = "It is not your turn"
+							if Global.game_state.selected_piece != null: 
+								makeMove()
 							
 					else: #there is no piece on the square			
-						if Global.game_state.selected_piece:
-							squareImOn = Global.game_state.selected_piece.square
-							var legal_moves = Global.game_state.selected_piece.legal_moves
-							# If the selected piece can go to that square
-							if is_legal(squareClicked.get_notation(), legal_moves):
-								var pieceInfo = Global.game_state.selected_piece.pieceInfo() 								
-								#send move to server who sends it to opponent 
-								serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)								
-								#make move on my screen
-								Global.game_state.selected_piece.move_to(squareClicked.get_notation())
-								myTurn = false
-								$GameControls/MyTurnLabel.text = "It is not your turn"
+						if Global.game_state.selected_piece != null: 
+							makeMove()
 
 
 		
@@ -224,13 +211,16 @@ func sendOppMove(square, pieceInfo):
 		#if the square I wanna go to has a piece on it remove it
 		if x["square"] == square:	
 			#delete piece 
-			x.queue_free()
 			Global.piece_list.erase(x)
-	
+			x.queue_free()
+				
 		#fnd the piece being moved and move it
 		if x["square"] == pieceInfo["square"]:	
 			x.set_square(square)
 			Global.game_state.selected_piece = x	
+	
+	#check for checks
+	
 	
 	myTurn = true
 	$GameControls/MyTurnLabel.text = "It is your turn!"
@@ -357,3 +347,47 @@ func _on_yes_watch_pressed() -> void:
 	joinGame.rpc(myID, code, theUsername, wantsToWatch)
 	
 	
+func clearPotentialMoveColors():
+	#reset previously selected piece's colour
+	for child in Global.game_state.selected_piece.mesh.get_children(): 
+		if Global.game_state.selected_piece.mesh.is_light: 
+			child.material_override = load("res://peice_meshs/white_piece_material.tres")
+		else:
+			child.material_override = load("res://peice_meshs/black_piece_material.tres")
+			
+	#reset previously selected square's colour
+	for square in Global.game_state.selected_piece.legal_moves: 
+		for legalSquare in $board.get_children():
+			if legalSquare.notation.column == square.column and legalSquare.notation.row == square.row:
+				legalSquare.backToOriginalColor()
+
+func setPotentialMoveColors():
+	for child in Global.game_state.selected_piece.mesh.get_children(): 								
+		child.material_override = load("res://peice_meshs/selected_piece_material.tres")
+
+	#get new selected legal squares and change it's colour
+	#print("setting legal move squares" )
+	#print("Global.game_state.selected_piece.legal_moves: ", Global.game_state.selected_piece.legal_moves)
+	for square in Global.game_state.selected_piece.legal_moves: 
+		#print("square: ", square)
+		for legalSquare in $board.get_children():				
+			#print("legalSquare: ", legalSquare.notation)		
+			if legalSquare.notation.column == square.column and legalSquare.notation.row == square.row:
+				#print("MATCH legalSquare: " , legalSquare.notation, "square: ", square)
+				legalSquare.changeSquareColor()
+
+func makeMove():
+	squareImOn = Global.game_state.selected_piece.square
+	var legal_moves = Global.game_state.selected_piece.legal_moves
+	print("legaMoves: ",Global.game_state.selected_piece.legal_moves )
+	# If the selected piece can go to that square
+	if is_legal(squareClicked.get_notation(), legal_moves):
+		var pieceInfo = Global.game_state.selected_piece.pieceInfo() 								
+		#send move to server who sends it to opponent 
+		serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)								
+		#make move on my screen
+		Global.game_state.selected_piece.move_to(squareClicked.get_notation())
+		myTurn = false
+		$GameControls/MyTurnLabel.text = "It is not your turn"
+		
+	clearPotentialMoveColors()
