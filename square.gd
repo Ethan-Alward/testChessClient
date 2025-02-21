@@ -30,7 +30,7 @@ func get_notation():
 	return notation
 	
 func changeSquareColor(): 
-	print("in change square colour")
+	#print("in change square colour")
 	
 	$MeshInstance3D.material_override = load("res://peice_meshs/selected_piece_material.tres")
 	#outline_material.set_shader_parameter("outline_color", Color(0 / 255.0, 89 / 255.0, 255 / 255.0))

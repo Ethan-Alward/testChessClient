@@ -2,6 +2,8 @@ extends Node
 var initial_piece_state = []
 
 var piece_list = []
+var myKingsPos 
+
 
 func translate(column, row):
 	var x = -('a'.unicode_at(0)-column.unicode_at(0)+4) + 0.5

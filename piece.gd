@@ -5,14 +5,16 @@ extends Node3D
 
 var piece_mesh
 var legal_moves = []
+var attackable_squares = []
 var mesh
+var num_moves
 
 var square = {
 	'column': '',
 	'row': -1
 }
 
-var num_moves = 0
+
 
 func pieceInfo(): 	
 	return {'type': type, 'square': square, 'is_white': is_white, 'num_moves': num_moves}
@@ -20,6 +22,8 @@ func pieceInfo():
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	#print("in piece.gd ready")
+	num_moves = 0
+	
 	match type:
 		Global.PIECE_TYPE.pawn:
 			piece_mesh = load("res://peice_meshs/pawn_mesh.tscn")
@@ -39,6 +43,7 @@ func _ready() -> void:
 	#print("finished piece.gd ready")
 
 func move_to(notation):
+	num_moves = 1
 	Global.check_capture(notation)
 	set_square(notation)
 	Global.game_state.is_white_turn = !Global.game_state.is_white_turn
@@ -58,6 +63,7 @@ func is_on(notation):
 	
 
 func get_legal_moves():
+	#print(square)
 	match type:
 		Global.PIECE_TYPE.pawn:
 			legal_moves = PieceMovements.pawn(is_white, square, num_moves)
@@ -71,3 +77,24 @@ func get_legal_moves():
 			legal_moves = PieceMovements.queen(is_white, square)
 		Global.PIECE_TYPE.king:
 			legal_moves = PieceMovements.king(is_white, square)
+
+func get_attackable_squares(): 
+	match type:
+		
+		#pawns can only attack/defend diagnol
+		Global.PIECE_TYPE.pawn:
+			attackable_squares = PieceMovements.pawnA(is_white, square, num_moves)
+			
+		#can see the whole board
+		Global.PIECE_TYPE.bishop:
+			attackable_squares = PieceMovements.bishopA(is_white, square)
+		Global.PIECE_TYPE.rook:
+			attackable_squares = PieceMovements.rookA(is_white, square)
+		Global.PIECE_TYPE.queen:
+			attackable_squares = PieceMovements.queenA(is_white, square)
+			
+		#king and knight's attackable/defendable squares are simply they're legal move squares
+		Global.PIECE_TYPE.knight:
+			attackable_squares = PieceMovements.knight(is_white, square)	
+		Global.PIECE_TYPE.king:
+			attackable_squares = PieceMovements.king(is_white, square)
