@@ -238,6 +238,7 @@ func updateGameState():
 	var numPiecesBlocking = 0 
 	var pieceBlocking = {}
 	var kingIsAttacked = false
+	var moveIsLegal = false
 	
 	for piece in Global.piece_list:
 		if ((piece.is_white != iAmWhitePieces) and (piece.type == Global.PIECE_TYPE.queen or piece.type == Global.PIECE_TYPE.bishop or piece.type == Global.PIECE_TYPE.rook)): #opps bishop queen or rook
@@ -262,9 +263,16 @@ func updateGameState():
 				print("only one piece blocking: " , pieceBlocking)
 				#remove all legal moves from the attacked piece except for ones that are between the attacking opps piece and my king
 				for move in pieceBlocking.legal_moves: 
+					moveIsLegal = false
 					for move2 in piece.attackable_squares: 
-						if move.column == move2.column and move.row == move2.row:
-							pieceBlocking.legal_moves.erase(move)
+						if move.column == move2.column and move.row == move2.row:			
+							moveIsLegal	 = true
+							
+					if move.column == piece.square.column and move.row == piece.square.row:
+						moveIsLegal = true
+						 
+					if !moveIsLegal:
+						pieceBlocking.legal_moves.erase(move)
 	
 
 	#check for checks	
@@ -289,7 +297,7 @@ func updateGameState():
 									if oppsPiece.type == Global.PIECE_TYPE.bishop or oppsPiece.type == Global.PIECE_TYPE.queen or oppsPiece.type == Global.PIECE_TYPE.rook:
 										oppsPiece.get_squares_to_king(myKingsPos.square)
 	
-										var moveIsLegal = false
+										moveIsLegal = false
 										for oppsPieceLegalMove in oppsPiece.squares_to_king:
 											#print("opps piece legal move ",oppsPieceLegalMove)
 																						
