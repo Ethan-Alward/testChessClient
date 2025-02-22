@@ -141,7 +141,7 @@ func king(is_white, curr_notation):
 						#if they do remove the move from my king's moves
 					isPieceNearKing = true
 					thePieceNearKing = oppsPiece
-					
+					print(thePieceNearKing.pieceInfo())
 	
 					
 	if isPieceNearKing: #verify that this piece is being defended if it is delete that oppsPece.square from kings legal moves. 
@@ -153,18 +153,28 @@ func king(is_white, curr_notation):
 						#if they do check that there are no pieces between them 
 							#only needed for bishops queens and rooks because nothing can block a kinght,pawn, or king's defense 
 						if oppsPiece.type == Global.PIECE_TYPE.queen or oppsPiece.type == Global.PIECE_TYPE.bishop or oppsPiece.type == Global.PIECE_TYPE.rook:
-							oppsPiece.get_squares_to_king()
+							oppsPiece.get_squares_to_king(curr_notation)
+							
+							print("opps piece info: ", oppsPiece.pieceInfo())
+							print(oppsPiece.squares_to_king)
+							
 							var piecesBetweenKing = 0
 							for square in oppsPiece.squares_to_king:
 								for piece in Global.piece_list:
 										if piece.square.row == square.row and piece.square.column == square.column:
 											piecesBetweenKing += 1
 							if piecesBetweenKing == 0: 
-								moves.erase(thePieceNearKing.square) #piece is defended
+								print("apparently theres a piece between")
+								for move in moves:
+									if move.column == thePieceNearKing.square.column and move.row == thePieceNearKing.square.row:
+										moves.erase(move) #piece is defended
 								
 						#piece is defended by a pawn, knight, or king					
 						else:
-							moves.erase(thePieceNearKing.square)  #piece is defended
+							for move in moves:
+									if move.column == thePieceNearKing.square.column and move.row == thePieceNearKing.square.row:
+										moves.erase(move) #piece is defended
+							#moves.erase(thePieceNearKing.square)  #piece is defended
 								
 										
 						
@@ -318,5 +328,5 @@ func collect_squares_to_king(_is_white, start_notation, directions, squareKingIs
 		
 		#if code reaches here reset the result 
 		tempResult = []
-	print(result)
+
 	return result

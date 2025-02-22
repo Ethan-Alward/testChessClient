@@ -288,11 +288,7 @@ func updateGameState():
 								for myPiecesLegalMove in tempPieceLegalMoves: 									
 									if oppsPiece.type == Global.PIECE_TYPE.bishop or oppsPiece.type == Global.PIECE_TYPE.queen or oppsPiece.type == Global.PIECE_TYPE.rook:
 										oppsPiece.get_squares_to_king(myKingsPos.square)
-										
-										#print("opps Piece info: ",oppsPiece.pieceInfo())
-										#print("opps Piece squares to king: ",oppsPiece.squares_to_king)
-										#print("my piece: " , myPiece.pieceInfo(), " my pieces legal moves: ", myPiece.legal_moves)
-										
+	
 										var moveIsLegal = false
 										for oppsPieceLegalMove in oppsPiece.squares_to_king:
 											#print("opps piece legal move ",oppsPieceLegalMove)
@@ -367,15 +363,16 @@ func sendOppMove(square, pieceInfo):
 	firstMoveMade = true 
 	for x in Global.piece_list: 
 		#if the square I wanna go to has a piece on it remove it
-		if x["square"] == square:	
+		if x.square.row == square.row and x.square.column == square.column:	
 			#delete piece 
 			Global.piece_list.erase(x)
 			x.queue_free()
 				
 		#fnd the piece being moved and move it
-		if x["square"] == pieceInfo["square"]:	
-			x.set_square(square)
-			Global.game_state.selected_piece = x	
+	for y in Global.piece_list: 
+		if  y.square.row == pieceInfo.square.row and y.square.column == pieceInfo.square.column:
+			y.set_square(square)
+			Global.game_state.selected_piece = y	
 	
 	
 	updateGameState()
@@ -525,8 +522,8 @@ func setPotentialMoveColors():
 
 	#get new selected legal squares and change it's colour
 	#print("setting legal move squares" )
-	print("Global.game_state.selected_piece.pieceInfo: ", Global.game_state.selected_piece.pieceInfo())
-	print("Global.game_state.selected_piece.legal_moves: ", Global.game_state.selected_piece.legal_moves)
+	#print("Global.game_state.selected_piece.pieceInfo: ", Global.game_state.selected_piece.pieceInfo())
+	#print("Global.game_state.selected_piece.legal_moves: ", Global.game_state.selected_piece.legal_moves)
 	for square in Global.game_state.selected_piece.legal_moves: 
 		#print("square: ", square)
 		for legalSquare in $board.get_children():				
@@ -539,7 +536,7 @@ func setPotentialMoveColors():
 func makeMove():	
 	squareImOn = Global.game_state.selected_piece.square
 	var legal_moves = Global.game_state.selected_piece.legal_moves
-	print("legal Moves: ",Global.game_state.selected_piece.legal_moves )
+	#print("legal Moves: ",Global.game_state.selected_piece.legal_moves )
 	# If the selected piece can go to that square
 	if is_legal(squareClicked.get_notation(), legal_moves):
 		var pieceInfo = Global.game_state.selected_piece.pieceInfo() 								
