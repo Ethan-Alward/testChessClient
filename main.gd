@@ -41,10 +41,11 @@ var selectedPieceOrigColour
 
 var inCheck
 var myKingsPos
-
+var checkmate
+var firstMoveMade
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:	
-	
+	checkmate = false
 	inCheck = false
 	code = 0
 	myID = 0
@@ -116,7 +117,7 @@ func getCode(gameCode):
 func startGame(): 	
 	print("game started from server call")
 	inGame = true
-	
+	firstMoveMade = false
 	#if iAmWhitePieces:
 		#$Camera3D.position = krjnsfbg
 	#else: 
@@ -156,6 +157,9 @@ func startGame():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
+	
+
+	
 	if inGame && myTurn:	
 		# ray casting
 		if Input.is_action_just_pressed("click"):
@@ -183,7 +187,9 @@ func _process(_delta: float) -> void:
 
 							#pieceOnSquare.get_legal_moves()
 							Global.game_state.selected_piece = pieceOnSquare	
-							Global.game_state.selected_piece.get_legal_moves()
+							if firstMoveMade == false: 
+								Global.game_state.selected_piece.get_legal_moves()
+							
 							setPotentialMoveColors()
 
 							
@@ -206,7 +212,9 @@ func is_legal(square, legal_moves):
 			return true
 	return false
 
-
+func checkMate():
+	print("checkmate")
+	inGame = false
 
 func updateGameState(): 
 	#update every legal_move and attackable squares for every piece on the board 
@@ -225,6 +233,8 @@ func updateGameState():
 			myKingsPos = piece
 	
 	#check for pins
+	
+	#currently broken
 	var numPiecesBlocking = 0 
 	var pieceBlocking = {}
 	var kingIsAttacked = false
@@ -239,29 +249,25 @@ func updateGameState():
 					
 			#check how many of my pieces are between my king and the attacking square
 			if kingIsAttacked:
-				for square2 in piece.attackable_squares: 
+				#get squares between king and attacking piece
+				piece.get_squares_to_king(myKingsPos.square)
+				for square in piece.squares_to_king: 
 					for attackedPiece in Global.piece_list:
-						if attackedPiece.is_white == iAmWhitePieces: 	
-							if square2.column == attackedPiece.square.column and square2.row == attackedPiece.square.row:
+						if attackedPiece.is_white == iAmWhitePieces: 
+							if square.column == attackedPiece.square.column and square.row == attackedPiece.square.row:
 								numPiecesBlocking += 1
 								pieceBlocking = attackedPiece
 								
 			if numPiecesBlocking == 1: 
+				print("only one piece blocking: " , pieceBlocking)
 				#remove all legal moves from the attacked piece except for ones that are between the attacking opps piece and my king
 				for move in pieceBlocking.legal_moves: 
-					if !piece.attackable_squares.has(move): 
-						pieceBlocking.legal_moves.remove(move)
-				
+					for move2 in piece.attackable_squares: 
+						if move.column == move2.column and move.row == move2.row:
+							pieceBlocking.legal_moves.erase(move)
 	
-	#remove king's ability to capture a defended piece
-	#for myKingsLegalMove in myKingsPos.legal_moves:
-		#var pieceNearKing = Global.check_square(myKingsLegalMove)	
-		#if pieceNearKing: 
-		#check if any piece's attackable squares match 
-			
-			
-			
-	#check for checks
+
+	#check for checks	
 	for oppsPiece in Global.piece_list:
 			if oppsPiece.is_white != iAmWhitePieces: #opps pieces
 				#check if legal_move is matches my king's position
@@ -269,74 +275,88 @@ func updateGameState():
 					if move.column == myKingsPos.square.column and move.row == myKingsPos.square.row: 
 						inCheck = true
 						print("in check")
+						# make it so the only legal moves for all my pieces are the ones that can get me out of check
+						#so that I don;t have to see a buncha bs potential moves show up on the board
+						
+						#edit all of my piece's legal_moves so they aren't 
+						
+						for myPiece in Global.piece_list:
+							if myPiece.is_white == iAmWhitePieces and myPiece.type != Global.PIECE_TYPE.king: #my pieces
+								#print("my piece: " , myPiece.pieceInfo(), " my pieces legal moves: ", myPiece.legal_moves)
+								
+								var tempPieceLegalMoves = myPiece.legal_moves.duplicate()
+								for myPiecesLegalMove in tempPieceLegalMoves: 									
+									if oppsPiece.type == Global.PIECE_TYPE.bishop or oppsPiece.type == Global.PIECE_TYPE.queen or oppsPiece.type == Global.PIECE_TYPE.rook:
+										oppsPiece.get_squares_to_king(myKingsPos.square)
+										
+										#print("opps Piece info: ",oppsPiece.pieceInfo())
+										#print("opps Piece squares to king: ",oppsPiece.squares_to_king)
+										#print("my piece: " , myPiece.pieceInfo(), " my pieces legal moves: ", myPiece.legal_moves)
+										
+										var moveIsLegal = false
+										for oppsPieceLegalMove in oppsPiece.squares_to_king:
+											#print("opps piece legal move ",oppsPieceLegalMove)
+																						
+											if myPiecesLegalMove.column == oppsPieceLegalMove.column and  myPiecesLegalMove.row == oppsPieceLegalMove.row: #can blcok
+												moveIsLegal = true
+												#print("this piece can block: ", myPiece.type, " on square:" ,myPiecesLegalMove)
+												
+										if myPiecesLegalMove.column == oppsPiece.square.column and  myPiecesLegalMove.row ==  oppsPiece.square.row: #can capture
+											moveIsLegal = true
+											#print("this piece can capture: ", myPiece.type, " on square:" ,myPiecesLegalMove)
+												
+										if !moveIsLegal: 
+											myPiece.legal_moves.erase(myPiecesLegalMove)
+				
+									else:
+											if myPiecesLegalMove.column == oppsPiece.square.column and  myPiecesLegalMove.row ==  oppsPiece.square.row:
+												for myPiecesLegalMoves in myPiece.legal_moves:
+													if myPiecesLegalMoves.column == myPiecesLegalMove.column and myPiecesLegalMoves.row == myPiecesLegalMove.row: 
+														myPiece.legal_moves.erase(myPiecesLegalMoves)
+											
+								#print("POST deleting my piece: " , myPiece.pieceInfo(), " my pieces legal moves: ", myPiece.legal_moves)
+						
+						#check for checkmate
 						#king can't move
+						#print("myKing's legal moves: ", myKingsPos.legal_moves)
 						if myKingsPos.legal_moves.is_empty():
 							#check if a piece can capture or block		
+							var canCapture = false
 							for myPiece in Global.piece_list:
-								if myPiece.is_white == iAmWhitePieces and myPiece.type != Global.PIECE_TYPE.king: #my piece
+								if myPiece.is_white == iAmWhitePieces: #my piece
 									for myLegalMove in myPiece.legal_moves:
-										for oppsLegalMove in oppsPiece.legal_moves: 						
-											#if I have a piece that can capture the checking piece 
-											if (myLegalMove.column == oppsPiece.square.column and myLegalMove.row == oppsPiece.square.row):
+										if myLegalMove.column == oppsPiece.square.column and myLegalMove.row == oppsPiece.square.row:
 												print("can capture, ", oppsPiece.pieceInfo(), " with ", myPiece.pieceInfo())
-																			
-											#or block it
-											else:
-												if (myLegalMove.column == oppsLegalMove.column and myLegalMove.row == oppsLegalMove.row): 
-													print("can block, ", oppsPiece.pieceInfo(), " with ", oppsPiece.pieceInfo())
-												else:
-													print("checkmate!!")
-
+												canCapture = true
+												
+												
+												
+							if !canCapture: #check if I can block
+								oppsPiece.get_squares_to_king(myKingsPos.square)
+								print(oppsPiece.squares_to_king)
+								if !oppsPiece.squares_to_king.is_empty():
+									#can block this king of piece
+									for myPiece in Global.piece_list:
+										if myPiece.is_white == iAmWhitePieces: #my piece
+											for myLegalMove in myPiece.legal_moves:
+												for squaresBetweenKing in oppsPiece.squares_to_king:
+													if myLegalMove.column == squaresBetweenKing.column and myLegalMove.row == squaresBetweenKing.row:
+														print("can block, ", oppsPiece.pieceInfo(), " with ", myPiece.pieceInfo())
+														
+									
+								else:
+									#can't block this king of piece
+									#it's mate
+									checkmate = true
+									checkMate()
+									
+									
+					
+			
 
 
 
 #
-#
-#
-##exclusively checks if your king is in check
-#func checkForChecks():		
-#
-	#for piece in Global.piece_list:
-		#if piece.is_white != iAmWhitePieces: #opps pieces
-			##get pieces legalmoves
-			#piece.get_legal_moves()
-			##check if legal_move is matches my king's position
-			#for move in piece.legal_moves: 
-				#if move.column == myKingsPos.square.column and move.row == myKingsPos.square.row: 
-					#inCheck = true
-					#print("in check")
-					#kingsInCheck(piece)
-			#
-	#
-#func kingsInCheck(pieceCheckingMe):
-	##set king's color
-	##for child in myKingsPos.mesh.get_children(): 								
-		##child.material_override = load("res://peice_meshs/selected_piece_material.tres")
-		#
-	##check if king has legal moves 
-	#myKingsPos.get_legal_moves()
-	#
-	##king can't move
-	#if myKingsPos.legal_moves.is_empty():
-		##check if a piece can capture or block		
-		#for piece in Global.piece_list:
-			#if piece.is_white == iAmWhitePieces and piece.type != Global.PIECE_TYPE.king: #my piece
-				#piece.get_legal_moves()
-				#for move in piece.legal_moves:
-					#for move2 in pieceCheckingMe.legal_moves: 						
-						##if I have a piece that can capture the checking piece 
-						#if (move.column == pieceCheckingMe.square.column and move.row == pieceCheckingMe.square.row):
-							#print("can capture, ", pieceCheckingMe.pieceInfo(), " with ", piece.pieceInfo())
-														#
-						##or block it
-						#else:
-							#if (move.column == move2.column and move.row == move2.row): s
-								#print("can block, ", pieceCheckingMe.pieceInfo(), " with ", piece.pieceInfo())
-							#else:
-								#print("checkmate!!")
-						#
-					#
-
 
 	
 	#update legal moves alg to check opponent's moves  
@@ -344,6 +364,7 @@ func updateGameState():
 @rpc("any_peer") #when server runs this it makes the opponents move appear on your screen
 func sendOppMove(square, pieceInfo):
 	#if square has piece on it, delete the piece
+	firstMoveMade = true 
 	for x in Global.piece_list: 
 		#if the square I wanna go to has a piece on it remove it
 		if x["square"] == square:	
@@ -358,7 +379,6 @@ func sendOppMove(square, pieceInfo):
 	
 	
 	updateGameState()
-	
 	
 	myTurn = true
 	$GameControls/MyTurnLabel.text = "It is your turn!"
@@ -505,34 +525,33 @@ func setPotentialMoveColors():
 
 	#get new selected legal squares and change it's colour
 	#print("setting legal move squares" )
-	#print("Global.game_state.selected_piece.legal_moves: ", Global.game_state.selected_piece.legal_moves)
+	print("Global.game_state.selected_piece.pieceInfo: ", Global.game_state.selected_piece.pieceInfo())
+	print("Global.game_state.selected_piece.legal_moves: ", Global.game_state.selected_piece.legal_moves)
 	for square in Global.game_state.selected_piece.legal_moves: 
 		#print("square: ", square)
 		for legalSquare in $board.get_children():				
 			#print("legalSquare: ", legalSquare.notation)		
 			if legalSquare.notation.column == square.column and legalSquare.notation.row == square.row:
 				#print("MATCH legalSquare: " , legalSquare.notation, "square: ", square)
+				
 				legalSquare.changeSquareColor()
 
-func makeMove():
-	
-	if !inCheck:
-		squareImOn = Global.game_state.selected_piece.square
-		var legal_moves = Global.game_state.selected_piece.legal_moves
-		print("legal Moves: ",Global.game_state.selected_piece.legal_moves )
-		# If the selected piece can go to that square
-		if is_legal(squareClicked.get_notation(), legal_moves):
-			var pieceInfo = Global.game_state.selected_piece.pieceInfo() 								
-			#send move to server who sends it to opponent 
-			serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)								
-			#make move on my screen
-			Global.game_state.selected_piece.move_to(squareClicked.get_notation())
-			myTurn = false
-			$GameControls/MyTurnLabel.text = "It is not your turn"
-			
-		clearPotentialMoveColors()
-	else: 
-		pass
+func makeMove():	
+	squareImOn = Global.game_state.selected_piece.square
+	var legal_moves = Global.game_state.selected_piece.legal_moves
+	print("legal Moves: ",Global.game_state.selected_piece.legal_moves )
+	# If the selected piece can go to that square
+	if is_legal(squareClicked.get_notation(), legal_moves):
+		var pieceInfo = Global.game_state.selected_piece.pieceInfo() 								
+		#send move to server who sends it to opponent 
+		serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)								
+		#make move on my screen
+		Global.game_state.selected_piece.move_to(squareClicked.get_notation())
+		myTurn = false
+		$GameControls/MyTurnLabel.text = "It is not your turn"
+		
+	clearPotentialMoveColors()
+
 
 #func returnKingPosition(): 
 	#for piece in Global.piece_list:

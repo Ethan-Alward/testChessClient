@@ -116,7 +116,7 @@ func king(is_white, curr_notation):
 		if !piece or (piece.is_white != is_white):
 			moves.push_back(check_notation)
 	
-	print("king moves: ", moves)
+	#print("king moves: ", moves)
 	#update kings moves to remove any squares opponent pieces are attacking
 	for piece in Global.piece_list:
 		if piece.is_white != is_white: #opps pieces
@@ -144,26 +144,31 @@ func king(is_white, curr_notation):
 					
 	
 					
-	if isPieceNearKing:
-		pass
-		#verify that this piece is being defended if it is delete that oppsPece.square from kings legal moves. 
-		
-		#for oppsPiece in Global.piece_list:
-			#if oppsPiece.is_white != is_white: #opps pieces
-				#for square2 in oppsPiece.attackable_squares: 
-					#for attackedPiece in Global.piece_list:
-						#if attackedPiece.is_white == is_white: 	
-							#if square2.column == attackedPiece.square.column and square2.row == attackedPiece.square.row:
-								#pieceBlocking = 
-								#
-		#if numPiecesBlocking == 1: 
-			##remove all legal moves from the attacked piece except for ones that are between the attacking opps piece and my king
-			#for move in pieceBlocking.legal_moves: 
-				#if !piece.attackable_squares.has(move): 
-					#pieceBlocking.legal_moves.remove(move)
-	##check opponent's piece that's checking me's square is in one of their piece's legal moves 
+	if isPieceNearKing: #verify that this piece is being defended if it is delete that oppsPece.square from kings legal moves. 
+		for oppsPiece in Global.piece_list:
+			if oppsPiece.is_white != is_white: #opps pieces
+				for oppsPieceMove in oppsPiece.attackable_squares:
+					#check all opps pieces has an attackable_square that matches thePieceNearKing.sqaure
+					if oppsPieceMove.row == thePieceNearKing.square.row and oppsPieceMove.column == thePieceNearKing.square.column:
+						#if they do check that there are no pieces between them 
+							#only needed for bishops queens and rooks because nothing can block a kinght,pawn, or king's defense 
+						if oppsPiece.type == Global.PIECE_TYPE.queen or oppsPiece.type == Global.PIECE_TYPE.bishop or oppsPiece.type == Global.PIECE_TYPE.rook:
+							oppsPiece.get_squares_to_king()
+							var piecesBetweenKing = 0
+							for square in oppsPiece.squares_to_king:
+								for piece in Global.piece_list:
+										if piece.square.row == square.row and piece.square.column == square.column:
+											piecesBetweenKing += 1
+							if piecesBetweenKing == 0: 
+								moves.erase(thePieceNearKing.square) #piece is defended
+								
+						#piece is defended by a pawn, knight, or king					
+						else:
+							moves.erase(thePieceNearKing.square)  #piece is defended
+								
+										
 						
-	print("king moves without opps attack mvoes: ", moves)
+	#print("king moves without opps attack mvoes: ", moves)
 	return moves
 
 
@@ -218,8 +223,27 @@ func pawnA(is_white, curr_notation, num_moves):
 		
 	return squares
 
+func kingA(is_white, curr_notation):
+	var moves = []
+	var directions = [
+		Vector2(1, 0), Vector2(-1, 0),
+		Vector2(0, 1), Vector2(0, -1),
+		Vector2(1, 1), Vector2(1, -1),
+		Vector2(-1, 1), Vector2(-1, -1)
+	]
+	var col_start = curr_notation.column.unicode_at(0)
+	var row_start = curr_notation.row
+	for dir in directions:
+		var col = col_start + dir.x
+		var row = row_start + dir.y
+		if col < 'a'.unicode_at(0) or col > 'h'.unicode_at(0) or row < 1 or row > 8:
+			continue
+		var check_notation = { 'column': String.chr(col), 'row': row }
+		moves.push_back(check_notation)
+			
+	return moves
 
-func collect_attackable_squares(is_white, start_notation, directions):
+func collect_attackable_squares(_is_white, start_notation, directions):
 	var result = []
 	var start_col = start_notation.column.unicode_at(0)
 	var start_row = start_notation.row
@@ -234,5 +258,65 @@ func collect_attackable_squares(is_white, start_notation, directions):
 			var next_notation = { 'column': String.chr(col), 'row': row }
 			result.push_back(next_notation)
 				
-	print("result: ", result)
+	#print("result: ", result)
+	return result
+	
+	
+	
+	
+func bishopK(is_white, curr_notation, squareKingIsOn):
+	var directions = [
+		Vector2(1, 1), Vector2(1, -1),
+		Vector2(-1, 1), Vector2(-1, -1)
+	]
+	return collect_squares_to_king(is_white, curr_notation, directions, squareKingIsOn)
+
+func rookK(is_white, curr_notation,squareKingIsOn):
+	var directions = [
+		Vector2(1, 0), Vector2(-1, 0),
+		Vector2(0, 1), Vector2(0, -1)
+	]
+	return collect_squares_to_king(is_white, curr_notation, directions, squareKingIsOn)
+
+func queenK(is_white, curr_notation, squareKingIsOn):
+	var directions = [
+		Vector2(1, 0), Vector2(-1, 0),
+		Vector2(0, 1), Vector2(0, -1),
+		Vector2(1, 1), Vector2(1, -1),
+		Vector2(-1, 1), Vector2(-1, -1)
+	]
+	return collect_squares_to_king(is_white, curr_notation, directions, squareKingIsOn)
+
+func collect_squares_to_king(_is_white, start_notation, directions, squareKingIsOn):
+	var tempResult = []
+	var result = []
+	var start_col = start_notation.column.unicode_at(0)
+	var start_row = start_notation.row
+	for dir in directions:
+		var col = start_col
+		var row = start_row
+		while true:
+			col += dir.x
+			row += dir.y
+			if col < 'a'.unicode_at(0) or col > 'h'.unicode_at(0) or row < 1 or row > 8:
+				break				
+			var next_notation = { 'column': String.chr(col), 'row': row }
+			tempResult.push_back(next_notation)
+		
+		#return only the squares between the king and the piece
+		#print("square king is on: " , squareKingIsOn)
+		#print("squares to king: ", tempResult)
+		#print(result.has(squareKingIsOn))
+		
+		for square in tempResult: 
+			if square.column == squareKingIsOn.column and square.row == squareKingIsOn.row:
+				tempResult.erase(square)
+				#print("correct result: ", tempResult)
+				result = tempResult
+				break
+				
+		
+		#if code reaches here reset the result 
+		tempResult = []
+	print(result)
 	return result
