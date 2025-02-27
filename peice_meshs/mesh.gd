@@ -12,12 +12,15 @@ func _ready() -> void:
 			outline_material = preload(("res://outline/white_outline.tres"))
 			child.material_override = preload("res://peice_meshs/white_piece_material.tres")
 			child.rotation_degrees.y -= 90
-			outline_material.set_shader_parameter("outline_color", Color(255 / 255.0, 81 / 255.0, 0 / 255.0))
+			#outline_material.set_shader_parameter("outline_color", Color(255 / 255.0, 81 / 255.0, 0 / 255.0))
+			outline_material.set_shader_parameter("outline_color", Color(0,0,0))
 		else:
 			outline_material = preload(("res://outline/black_outline.tres"))
 			child.material_override = preload("res://peice_meshs/black_piece_material.tres")
 			child.rotation_degrees.y += 90
-			outline_material.set_shader_parameter("outline_color", Color(0 / 255.0, 89 / 255.0, 255 / 255.0))
+			outline_material.set_shader_parameter("outline_color", Color(255, 255, 255))
 		child.material_overlay = outline_material
 	outline_material.set_shader_parameter("outline_width", 1)
+		
+		
 	#print("end of mesh.gd for loop")
