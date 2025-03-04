@@ -157,9 +157,7 @@ func startGame():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-	
-
-	
+		
 	if inGame && myTurn:	
 		# ray casting
 		if Input.is_action_just_pressed("click"):
@@ -232,9 +230,7 @@ func updateGameState():
 		if piece.type == Global.PIECE_TYPE.king and piece.is_white == iAmWhitePieces: 
 			myKingsPos = piece
 	
-	#check for pins
-	
-	#currently broken
+	#check for pins	
 	var numPiecesBlocking = 0 
 	var pieceBlocking = {}
 	var kingIsAttacked = false
@@ -522,24 +518,26 @@ func clearPotentialMoveColors():
 	for square in Global.game_state.selected_piece.legal_moves: 
 		for legalSquare in $board.get_children():
 			if legalSquare.notation.column == square.column and legalSquare.notation.row == square.row:
-				legalSquare.backToOriginalColor()
+				legalSquare.setSelectSquareVis(false)
+				legalSquare.setSquareColour(false)
+
+
 
 func setPotentialMoveColors():
 	for child in Global.game_state.selected_piece.mesh.get_children(): 								
 		child.material_override = load("res://peice_meshs/selected_piece_material.tres")
 
-	#get new selected legal squares and change it's colour
-	#print("setting legal move squares" )
-	#print("Global.game_state.selected_piece.pieceInfo: ", Global.game_state.selected_piece.pieceInfo())
-	#print("Global.game_state.selected_piece.legal_moves: ", Global.game_state.selected_piece.legal_moves)
+	#get new selected legal squares and change it's colour	
 	for square in Global.game_state.selected_piece.legal_moves: 
-		#print("square: ", square)
 		for legalSquare in $board.get_children():				
-			#print("legalSquare: ", legalSquare.notation)		
 			if legalSquare.notation.column == square.column and legalSquare.notation.row == square.row:
-				#print("MATCH legalSquare: " , legalSquare.notation, "square: ", square)
 				
-				legalSquare.changeSquareColor()
+				var isPieceOnSquare = Global.check_square(legalSquare.notation)
+				
+				if isPieceOnSquare: 
+					legalSquare.setSquareColour(true)
+				else:
+					legalSquare.setSelectSquareVis(true)
 
 func makeMove():	
 	squareImOn = Global.game_state.selected_piece.square

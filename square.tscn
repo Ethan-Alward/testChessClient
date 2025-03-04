@@ -1,15 +1,18 @@
-[gd_scene load_steps=5 format=3 uid="uid://cc42x4ettus52"]
+[gd_scene load_steps=6 format=3 uid="uid://cc42x4ettus52"]
 
 [ext_resource type="Script" path="res://square.gd" id="1_r281r"]
+[ext_resource type="Material" uid="uid://disdfpnvequ3c" path="res://peice_meshs/selected_piece_material.tres" id="2_oava6"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_bhu1w"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_2dvln"]
 
-[sub_resource type="Environment" id="Environment_fv6vi"]
-background_mode = 5
-glow_enabled = true
-glow_intensity = 0.0
+[sub_resource type="CylinderMesh" id="CylinderMesh_wyrel"]
+material = ExtResource("2_oava6")
+top_radius = 0.25
+bottom_radius = 0.25
+height = 0.1
+cap_bottom = false
 
 [node name="Square" type="Node3D"]
 script = ExtResource("1_r281r")
@@ -24,5 +27,6 @@ mesh = SubResource("BoxMesh_bhu1w")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D"]
 shape = SubResource("BoxShape3D_2dvln")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_fv6vi")
+[node name="Selected" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0122313, 0)
+mesh = SubResource("CylinderMesh_wyrel")
