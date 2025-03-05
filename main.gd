@@ -13,7 +13,6 @@ var code
 var myID 
 var oppId 
 var oppName
-var gameID
 var iAmWhitePieces
 var myTurn
 
@@ -50,7 +49,7 @@ func _ready() -> void:
 	code = 0
 	myID = 0
 	oppId = 0
-	gameID = 0
+	
 	
 	print("Connecting To Server ...")	
 	multiplayer_peer = ENetMultiplayerPeer.new()
@@ -74,19 +73,8 @@ func _ready() -> void:
 	
 	#homepage.newGame.connect(newGame.bind())
 	
-	gameControls = $GameControls
-	leaveButton = $GameControls/LeaveButton
-	codeLabel = $GameControls/CodeLabel
-	myPiecesLabel = $GameControls/MyPiecesLabel
-	oppLabel = $GameControls/OpponentLabel
+	GameControlsVisible(false)
 	
-	
-	codeLabel.visible = false
-	oppLabel.visible = false
-	leaveButton.visible = false
-	myPiecesLabel.visible = false
-	$GameControls/MyTurnLabel.visible = false
-	$GameControls/MyNameLabel.visible = false
 	
 	
 
@@ -94,6 +82,7 @@ func joinTheGame(gameCode):
 	wantsToWatch = false
 	joinGame.rpc(myID, gameCode, theUsername, wantsToWatch)	
 	code = gameCode
+	print("%s"%typeof(code))
 	
 
 
@@ -102,14 +91,12 @@ func newGame():
 	rpc_id(1, "createNewGame", myID, theUsername)
 
 
-	
-
 
 @rpc("any_peer")
 func getCode(gameCode):
 	code = gameCode
 	print(code)
-	codeLabel.text = "Code: %s" %code 
+	$GameControls/PanelContainer/VBoxContainer/CodeLabel.text = "Code: %s" %code 
 
 	
 
@@ -123,7 +110,7 @@ func startGame():
 	#else: 
 		#$Camera3D.position = kshjbks
 	
-	$GameControls/MyNameLabel.text = theUsername
+	$GameControls/PanelContainer/VBoxContainer/HBoxContainer/MyNameLabel.text = theUsername
 	#set up board
 	#print("start of server handshake")
 	Global.server_hand_shake()
@@ -143,17 +130,18 @@ func startGame():
 		add_child(piece)
 		#print("piece add as child")
 	
+	GameControlsVisible(true)
 
-	$GameControls.visible = true
-	codeLabel.visible = true
-	oppLabel.visible = true
-	leaveButton.visible = true
-	myPiecesLabel.visible = true
-	$GameControls/MyTurnLabel.visible = true
-	$GameControls/MyNameLabel.visible = true
 	
-	oppLabel.text = "oppenent's name: %s" %oppName
-	codeLabel.text = "Code: %s" %code
+	#codeLabel.visible = true
+	#oppLabel.visible = true
+	#leaveButton.visible = true
+	#myPiecesLabel.visible = true
+	#$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.visible = true
+	#$GameControls/PanelContainer/VBoxContainer/HBoxContainer/MyNameLabel.visible = true
+	
+	#$GameControls/PanelContainer/VBoxContainer/HBoxContainer/OpponentLabel.text = " vs %s" %oppName
+	#codeLabel.text = "Code: %s" %code
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
@@ -213,6 +201,17 @@ func is_legal(square, legal_moves):
 func checkMate():
 	print("checkmate")
 	inGame = false
+	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "You have been Checkmated"
+	
+	$EndGameDisplay.visible = true
+	rpc_id(1, "sendOppTheyWon", myID, code)
+	
+	#Send signal to server saying you won! 
+	
+@rpc("any_peer") #when server runs this it makes the opponents move appear on your screen
+func sendOppTheyWon():	
+	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "You have Checkmated your Opponent"
+	$EndGameDisplay.visible = true
 
 func updateGameState(): 
 	#update every legal_move and attackable squares for every piece on the board 
@@ -350,17 +349,9 @@ func updateGameState():
 									checkmate = true
 									checkMate()
 									
-									
-					
-			
 
 
 
-#
-
-	
-	#update legal moves alg to check opponent's moves  
-	pass
 @rpc("any_peer") #when server runs this it makes the opponents move appear on your screen
 func sendOppMove(square, pieceInfo):
 	#if square has piece on it, delete the piece
@@ -382,14 +373,14 @@ func sendOppMove(square, pieceInfo):
 	updateGameState()
 	
 	myTurn = true
-	$GameControls/MyTurnLabel.text = "It is your turn!"
+	$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.text = "It is your turn!"
 
 
 @rpc("any_peer") #when connected to an opponent tell them the opps id
 func connectToOpp(opponentId, oppsName):
 	oppId = opponentId
 	oppName = oppsName
-	oppLabel.text = "you are playing against: %s" %oppName
+	$GameControls/PanelContainer/VBoxContainer/HBoxContainer/OpponentLabel.text = "%s" %oppName
 	print("Currently playing against: " + str(oppId))
 
 
@@ -404,12 +395,12 @@ func isMyTurn(x):
 	Global.game_state.player_color = x
 	if x:
 		iAmWhitePieces = true
-		myPiecesLabel.text = "You are the white pieces" 
-		$GameControls/MyTurnLabel.text = "It is your turn!"
+		$GameControls/PanelContainer/VBoxContainer/MyPiecesLabel.text = "You are the white pieces" 
+		$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.text = "It is your turn!"
 	else:
 		iAmWhitePieces = false
-		myPiecesLabel.text = "You are the black pieces" 
-		$GameControls/MyTurnLabel.text = "not your turn yet.."
+		$GameControls/PanelContainer/VBoxContainer/MyPiecesLabel.text = "You are the black pieces" 
+		$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.text = "not your turn yet.."
 		
 		
 func _on_server_disconnected():
@@ -430,7 +421,6 @@ func endGame():
 		
 	Global.deletePieces()
 	oppId = 0
-	gameID = 0
 	code = 0
 	
 	homepage._ready()	
@@ -440,17 +430,22 @@ func oppDisconnected():
 	#trigger end of game and error message
 	print("opp disconnected")
 	#oppDisconnected display
-	$DiconnectedDisplay.visible = true
-	$DiconnectedDisplay/ColorRect.visible = true
-	$DiconnectedDisplay/ColorRect/DisconnectedButton.visible = true
-	$DiconnectedDisplay/ColorRect/Label.visible = true
+	$EndGameDisplay.visible = true
+	$EndGameDisplay/PanelContainer.visible = true
+	$EndGameDisplay/PanelContainer/VBoxContainer.visible = true
+	$EndGameDisplay/PanelContainer/VBoxContainer/DisconnectedButton.visible = true
+	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "Your Opponent Has Been Disconnected"
+	$EndGameDisplay/PanelContainer/VBoxContainer/Label.visible = true
 
 @rpc("any_peer")
-func invalidJoinGame():
+func invalidJoinGame(isAGame):
+	if isAGame: 
+		$Homepage/InvalidJoinGame.text = "Game is full"
+	else:
+		$Homepage/InvalidJoinGame.text = "There is no game with that code, please verify you have the right code or start new game"
+	
 	$Homepage/Subtitle.visible = false
 	$Homepage/InvalidJoinGame.visible = true
-	$Homepage/InvalidJoinGame.text = "Game is full, please verify you have the right code or start new game"
-
 	$Homepage/CodeTextBox.visible = true
 	$Homepage/EnterCode.visible = true
 	$Homepage/Play.visible = true	
@@ -460,18 +455,22 @@ func invalidJoinGame():
 
 
 func theUsernamePasser(theName):
-	print("passing username into func")
+	#print("passing username into func")
 	theUsername = theName
-	print(theUsername)
+	$GameControls/PanelContainer/VBoxContainer/HBoxContainer/MyNameLabel.text = theUsername
+	
+	#print(theUsername)
 	
 
 func _on_leave_button_pressed() -> void:
 	endGame()
-	rpc_id(1, "leftGame", myID, gameID)
+	rpc_id(1, "leftGame", myID, code)
+
+
 
 func _on_disconnected_button_pressed() -> void:
 	endGame()
-	$DiconnectedDisplay/ColorRect.visible = false
+	$EndGameDisplay.visible = false
 
 
 	
@@ -480,7 +479,7 @@ func serverIsLegal(_oppID, _square, _piece):
 	pass
 	
 @rpc("any_peer")
-func leftGame(_myID, _gameID):
+func leftGame(_myID, _code):
 	pass
 	
 @rpc("any_peer")
@@ -493,17 +492,17 @@ func joinGame(_id, _code, _name, _wannaWatch):
 	
 
 
-func _on_no_watch_pressed() -> void:
-	wantsToWatch = false
-	$Homepage/NoWatch.visible = false
-	$Homepage/YesWatch.visible = false
-
-
-func _on_yes_watch_pressed() -> void:
-	wantsToWatch = true
-	$Homepage/NoWatch.visible = false
-	$Homepage/YesWatch.visible = false
-	joinGame.rpc(myID, code, theUsername, wantsToWatch)
+#func _on_no_watch_pressed() -> void:
+	#wantsToWatch = false
+	#$Homepage/NoWatch.visible = false
+	#$Homepage/YesWatch.visible = false
+#
+#
+#func _on_yes_watch_pressed() -> void:
+	#wantsToWatch = true
+	#$Homepage/NoWatch.visible = false
+	#$Homepage/YesWatch.visible = false
+	#joinGame.rpc(myID, code, theUsername, wantsToWatch)
 	
 	
 func clearPotentialMoveColors():
@@ -551,12 +550,50 @@ func makeMove():
 		#make move on my screen
 		Global.game_state.selected_piece.move_to(squareClicked.get_notation())
 		myTurn = false
-		$GameControls/MyTurnLabel.text = "It is not your turn"
+		$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.text = "It is not your turn"
 		
 	clearPotentialMoveColors()
 
 
-#func returnKingPosition(): 
-	#for piece in Global.piece_list:
-		#if piece.type == Global.PIECE_TYPE.king and piece.is_white == iAmWhitePieces: 
-			#return piece
+func GameControlsVisible(isOn): 
+	$GameControls.visible = isOn
+	$GameControls/PanelContainer.visible = isOn
+	$GameControls/PanelContainer/VBoxContainer.visible = isOn
+	$GameControls/PanelContainer/VBoxContainer/CodeLabel.visible = isOn
+	$GameControls/PanelContainer/VBoxContainer/HBoxContainer.visible = isOn
+	$GameControls/PanelContainer/VBoxContainer/HBoxContainer/MyNameLabel.visible = isOn
+	$GameControls/PanelContainer/VBoxContainer/HBoxContainer/OpponentLabel.visible = isOn
+	$GameControls/PanelContainer/VBoxContainer/LeaveButton.visible = isOn
+	$GameControls/PanelContainer/VBoxContainer/MyPiecesLabel.visible = isOn
+	$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.visible = isOn
+			
+		
+
+
+func _on_send_button_pressed() -> void:
+	var curText = $GameControls/PanelContainer/VBoxContainer/HBoxContainer2/LineEdit.text	
+	curText = curText + "\n"
+	$GameControls/PanelContainer/VBoxContainer/HBoxContainer2/LineEdit.text = ""	
+	$GameControls/PanelContainer/VBoxContainer/TextEdit.text += curText
+	$GameControls/PanelContainer/VBoxContainer/TextEdit.scroll_vertical = INF
+	
+	rpc_id(1, "sendText", curText, myID, code)
+
+
+
+@rpc("any_peer")
+func sendText(_text, _myID, _code):
+	pass
+	
+@rpc("any_peer")
+func receiveText(text):
+	$GameControls/PanelContainer/VBoxContainer/TextEdit.text += text
+	$GameControls/PanelContainer/VBoxContainer/TextEdit.scroll_vertical = INF
+	
+	
+	
+	
+	
+	
+	
+	

@@ -124,10 +124,15 @@ func _on_new_pressed() -> void:
 func _on_play_pressed() -> void:
 	#try joining the game
 	theUsername.emit(theName)
+
 	
 	if newOrJoin == "join": 
 		if code.length() == 4: 
-			joinGame.emit(code)
+			var intCode = code.to_int()
+			print("HELLO")
+			var temp = typeof(intCode)
+			print("%s" %temp)
+			joinGame.emit(intCode)
 		else:
 			$InvalidJoinGame.text = "game code must be 4 numbers" 
 			$InvalidJoinGame.visible = true
@@ -162,10 +167,11 @@ func _on_disconnected_button_pressed() -> void:
 
 
 func _on_name_box_text_changed(new_text: String) -> void:
-	if new_text.length() > 15:
+	if new_text.length() > 8:
 		NameBox.text = ""
 	else:
 		theName = new_text
+		
 
 
 func _on_name_confirm_pressed() -> void:
@@ -176,9 +182,9 @@ func _on_name_confirm_pressed() -> void:
 			
 		NameBox.visible = false
 		NameLabel.visible = false
-		NameConfirm.visible = false 
-		
+		NameConfirm.visible = false 		
 		JoinButton.visible = true
 		NewButton.visible = true
 		GameTypeButton.visible = true
+		NoNameEntered.visible = false
 		

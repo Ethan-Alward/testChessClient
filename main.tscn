@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://c10jyjqno4uob"]
+[gd_scene load_steps=17 format=3 uid="uid://c10jyjqno4uob"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_c5b25"]
 [ext_resource type="PackedScene" uid="uid://bw0pevh1wrku7" path="res://board.tscn" id="1_n0yl5"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://homepage.gd" id="6_18ftb"]
 [ext_resource type="Script" path="res://game_type_button.gd" id="7_fvt5g"]
 [ext_resource type="Script" path="res://diconnected_display.gd" id="7_jvh5b"]
+[ext_resource type="Script" path="res://game_controls.gd" id="8_57441"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_cxyr4"]
 shader = ExtResource("5_8ys2h")
@@ -276,9 +277,9 @@ anchor_top = 0.158
 anchor_right = 0.5
 anchor_bottom = 0.158
 offset_left = -297.0
-offset_top = 48.624
+offset_top = 25.624
 offset_right = 333.0
-offset_bottom = 166.624
+offset_bottom = 120.624
 text = "Game is full, please verify you have the right code or start new game"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -304,110 +305,145 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -243.0
+offset_left = -1152.0
 grow_horizontal = 0
 grow_vertical = 2
+script = ExtResource("8_57441")
 
-[node name="CodeLabel" type="Label" parent="GameControls"]
+[node name="PanelContainer" type="PanelContainer" parent="GameControls"]
 layout_mode = 0
-offset_left = 14.0
-offset_top = 21.0
-offset_right = 62.0
-offset_bottom = 44.0
+offset_left = 896.0
+offset_top = 24.0
+offset_right = 1128.0
+offset_bottom = 595.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GameControls/PanelContainer"]
+layout_mode = 2
+
+[node name="CodeLabel" type="Label" parent="GameControls/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 30
 text = "Code: "
 
-[node name="OpponentLabel" type="Label" parent="GameControls"]
-layout_mode = 0
-offset_left = 31.0
-offset_top = 117.0
-offset_right = 227.0
-offset_bottom = 152.0
-theme_override_font_sizes/font_size = 10
-text = "Oppnent Name: "
+[node name="HBoxContainer" type="HBoxContainer" parent="GameControls/PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
 
-[node name="LeaveButton" type="Button" parent="GameControls"]
-layout_mode = 0
-offset_left = 75.0
-offset_top = 258.0
-offset_right = 185.0
-offset_bottom = 308.0
-text = "Leave Game"
+[node name="MyNameLabel" type="Label" parent="GameControls/PanelContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "me"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
 
-[node name="MyPiecesLabel" type="Label" parent="GameControls"]
-layout_mode = 0
-offset_left = 47.0
-offset_top = 172.0
-offset_right = 202.0
-offset_bottom = 195.0
+[node name="Label" type="Label" parent="GameControls/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "VS"
+
+[node name="OpponentLabel" type="Label" parent="GameControls/PanelContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "opp"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MyPiecesLabel" type="Label" parent="GameControls/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "You are the x pieces"
 
-[node name="MyTurnLabel" type="Label" parent="GameControls"]
-layout_mode = 0
-offset_left = 79.0
-offset_top = 217.0
-offset_right = 189.0
-offset_bottom = 240.0
+[node name="MyTurnLabel" type="Label" parent="GameControls/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
 text = "It is your turn!"
 
-[node name="MyNameLabel" type="Label" parent="GameControls"]
-layout_mode = 0
-offset_left = 23.0
-offset_top = 72.0
-offset_right = 110.0
-offset_bottom = 104.0
-text = "Name: "
+[node name="TextEdit" type="TextEdit" parent="GameControls/PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+scroll_smooth = true
+scroll_fit_content_height = true
 
-[node name="DiconnectedDisplay" type="NinePatchRect" parent="."]
-offset_left = 3.0
-offset_top = 1.0
-offset_right = 1155.0
-offset_bottom = 653.0
+[node name="HBoxContainer2" type="HBoxContainer" parent="GameControls/PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="LineEdit" type="LineEdit" parent="GameControls/PanelContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "chat"
+
+[node name="SendButton" type="Button" parent="GameControls/PanelContainer/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "Send"
+
+[node name="LeaveButton" type="Button" parent="GameControls/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Leave Game"
+icon_alignment = 1
+
+[node name="EndGameDisplay" type="NinePatchRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -576.0
+offset_top = -326.0
+offset_right = 576.0
+offset_bottom = 326.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("7_jvh5b")
 
-[node name="ColorRect" type="ColorRect" parent="DiconnectedDisplay"]
+[node name="PanelContainer" type="PanelContainer" parent="EndGameDisplay"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -327.5
-offset_top = -192.5
-offset_right = 327.5
-offset_bottom = 192.5
+offset_left = -244.0
+offset_top = -173.5
+offset_right = 244.0
+offset_bottom = 173.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="DiconnectedDisplay/ColorRect"]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -259.5
-offset_right = 265.5
-offset_bottom = 193.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+[node name="VBoxContainer" type="VBoxContainer" parent="EndGameDisplay/PanelContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+alignment = 1
+
+[node name="Label" type="Label" parent="EndGameDisplay/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Your Opponent Has Been Disconnected
 "
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DisconnectedButton" type="Button" parent="DiconnectedDisplay/ColorRect"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -122.0
-offset_top = -46.5
-offset_right = 122.0
-offset_bottom = 46.5
-grow_horizontal = 2
-grow_vertical = 2
+[node name="DisconnectedButton" type="Button" parent="EndGameDisplay/PanelContainer/VBoxContainer"]
+layout_direction = 1
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
 text = "Return Home"
+icon_alignment = 1
 
 [connection signal="pressed" from="Homepage/Guest" to="Homepage" method="_on_guest_pressed"]
 [connection signal="pressed" from="Homepage/Regular" to="Homepage" method="_on_regular_pressed"]
@@ -421,5 +457,6 @@ text = "Return Home"
 [connection signal="toggled" from="Homepage/GameTypeButton" to="Homepage/GameTypeButton" method="_on_game_type_button_toggled"]
 [connection signal="pressed" from="Homepage/YesWatch" to="." method="_on_yes_watch_pressed"]
 [connection signal="pressed" from="Homepage/NoWatch" to="." method="_on_no_watch_pressed"]
-[connection signal="pressed" from="GameControls/LeaveButton" to="." method="_on_leave_button_pressed"]
-[connection signal="pressed" from="DiconnectedDisplay/ColorRect/DisconnectedButton" to="." method="_on_disconnected_button_pressed"]
+[connection signal="pressed" from="GameControls/PanelContainer/VBoxContainer/HBoxContainer2/SendButton" to="." method="_on_send_button_pressed"]
+[connection signal="pressed" from="GameControls/PanelContainer/VBoxContainer/LeaveButton" to="." method="_on_leave_button_pressed"]
+[connection signal="pressed" from="EndGameDisplay/PanelContainer/VBoxContainer/DisconnectedButton" to="." method="_on_disconnected_button_pressed"]
