@@ -74,6 +74,7 @@ func _ready() -> void:
 	#homepage.newGame.connect(newGame.bind())
 	
 	GameControlsVisible(false)
+	loadingScreenVisible(false)
 	
 	
 	
@@ -82,7 +83,7 @@ func joinTheGame(gameCode):
 	wantsToWatch = false
 	joinGame.rpc(myID, gameCode, theUsername, wantsToWatch)	
 	code = gameCode
-	print("%s"%typeof(code))
+
 	
 
 
@@ -97,12 +98,20 @@ func getCode(gameCode):
 	code = gameCode
 	print(code)
 	$GameControls/PanelContainer/VBoxContainer/CodeLabel.text = "Code: %s" %code 
-
+	$LoadingScreen/PanelContainer/VBoxContainer/Label.text = "Code: %s" %code
 	
+@rpc("any_peer")
+func loadingScreen():
+	loadingScreenVisible(true)
+	
+
 
 @rpc
 func startGame(): 	
 	print("game started from server call")
+	
+	loadingScreenVisible(false)
+	
 	inGame = true
 	firstMoveMade = false
 	#if iAmWhitePieces:
@@ -458,8 +467,9 @@ func theUsernamePasser(theName):
 	#print("passing username into func")
 	theUsername = theName
 	$GameControls/PanelContainer/VBoxContainer/HBoxContainer/MyNameLabel.text = theUsername
+	$LoadingScreen/PanelContainer/VBoxContainer/SubLabel.text = "Welcome %s" %theUsername
 	
-	#print(theUsername)
+
 	
 
 func _on_leave_button_pressed() -> void:
@@ -568,12 +578,19 @@ func GameControlsVisible(isOn):
 	$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.visible = isOn
 			
 		
-
+func loadingScreenVisible(isOn):
+	$LoadingScreen.visible = isOn
+	$LoadingScreen/PanelContainer.visible = isOn
+	$LoadingScreen/PanelContainer/VBoxContainer.visible = isOn
+	$LoadingScreen/PanelContainer/VBoxContainer/Label.visible = isOn
+	$LoadingScreen/PanelContainer/VBoxContainer/SubLabel.visible = isOn
+	$LoadingScreen/PanelContainer/VBoxContainer/SubLabel2.visible = isOn
+	$LoadingScreen/PanelContainer/VBoxContainer/SubLabel3.visible = isOn
+	$LoadingScreen/PanelContainer/VBoxContainer/TextureRect.visible = isOn
+	$LoadingScreen.isOn(true)
+	
 
 func _on_send_button_pressed() -> void:
-	
-
-	
 	var curText = $GameControls/PanelContainer/VBoxContainer/HBoxContainer2/LineEdit.text
 	
 	if curText.length() > 1:
@@ -581,7 +598,7 @@ func _on_send_button_pressed() -> void:
 		var sendingText = str("[left] ",theUsername,": ", curText, "\n[/left]")
 		$GameControls/PanelContainer/VBoxContainer/HBoxContainer2/LineEdit.text = ""	
 		$GameControls/PanelContainer/VBoxContainer/RichTextLabel.text += sendingText
-		rpc_id(1, "sendText", curText, myID, code)
+		rpc_id(1, "sendText", sendingText, myID, code)
 		$GameControls/PanelContainer/ChatLabel.visible = false
 
 
