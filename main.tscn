@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://c10jyjqno4uob"]
+[gd_scene load_steps=18 format=3 uid="uid://c10jyjqno4uob"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_c5b25"]
 [ext_resource type="PackedScene" uid="uid://bw0pevh1wrku7" path="res://board.tscn" id="1_n0yl5"]
@@ -42,6 +42,12 @@ tonemap_mode = 3
 /styles/Standard = SubResource("StyleBoxFlat_w6a84")
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_vtkfx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8f3c1"]
+bg_color = Color(0, 0, 0, 0.592157)
+border_width_top = 3
+border_width_bottom = 3
+border_color = Color(0, 0.992157, 0.494118, 1)
 
 [node name="main" type="Node3D"]
 script = ExtResource("1_c5b25")
@@ -102,38 +108,6 @@ offset_right = 491.0
 offset_bottom = 121.0
 text = "A Game Out of This World!"
 horizontal_alignment = 1
-
-[node name="Guest" type="Button" parent="Homepage"]
-layout_mode = 0
-offset_left = 108.0
-offset_top = 145.0
-offset_right = 302.0
-offset_bottom = 317.0
-theme_override_colors/icon_normal_color = Color(0.197937, 0.197937, 0.197937, 1)
-theme_override_colors/icon_pressed_color = Color(0.637843, 0.637843, 0.637843, 1)
-theme_override_colors/icon_hover_color = Color(0.639216, 0.639216, 0.639216, 1)
-toggle_mode = true
-text = "Guest"
-
-[node name="Regular" type="Button" parent="Homepage"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 29.0
-offset_top = -141.0
-offset_right = 223.0
-offset_bottom = 31.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/icon_normal_color = Color(0.197937, 0.197937, 0.197937, 1)
-theme_override_colors/icon_pressed_color = Color(0.637843, 0.637843, 0.637843, 1)
-theme_override_colors/icon_hover_color = Color(0.639216, 0.639216, 0.639216, 1)
-toggle_mode = true
-text = "Regular
-"
 
 [node name="Back" type="Button" parent="Homepage"]
 layout_mode = 0
@@ -369,13 +343,12 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 12
 text = "It is your turn!"
 
-[node name="TextEdit" type="TextEdit" parent="GameControls/PanelContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 250)
+[node name="RichTextLabel" type="RichTextLabel" parent="GameControls/PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
-theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 12
-scroll_smooth = true
-scroll_fit_content_height = true
+theme_override_styles/normal = SubResource("StyleBoxFlat_8f3c1")
+bbcode_enabled = true
+scroll_following = true
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="GameControls/PanelContainer/VBoxContainer"]
 layout_mode = 2
@@ -395,6 +368,12 @@ layout_mode = 2
 text = "Leave Game"
 icon_alignment = 1
 
+[node name="ChatLabel" type="Label" parent="GameControls/PanelContainer"]
+layout_mode = 2
+text = "Chats Will Appear Here"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="EndGameDisplay" type="NinePatchRect" parent="."]
 anchors_preset = 8
 anchor_left = 0.5
@@ -407,6 +386,7 @@ offset_right = 576.0
 offset_bottom = 326.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_vertical = 8
 script = ExtResource("7_jvh5b")
 
 [node name="PanelContainer" type="PanelContainer" parent="EndGameDisplay"]
@@ -445,8 +425,6 @@ size_flags_vertical = 3
 text = "Return Home"
 icon_alignment = 1
 
-[connection signal="pressed" from="Homepage/Guest" to="Homepage" method="_on_guest_pressed"]
-[connection signal="pressed" from="Homepage/Regular" to="Homepage" method="_on_regular_pressed"]
 [connection signal="pressed" from="Homepage/Back" to="Homepage" method="_on_back_pressed"]
 [connection signal="pressed" from="Homepage/New" to="Homepage" method="_on_new_pressed"]
 [connection signal="pressed" from="Homepage/Join" to="Homepage" method="_on_join_pressed"]

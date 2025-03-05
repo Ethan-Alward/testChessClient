@@ -1,7 +1,7 @@
 extends NinePatchRect
 
-@onready var GuestButton = $Guest
-@onready var RegularButton = $Regular
+#@onready var GuestButton = $Guest
+#@onready var RegularButton = $Regular
 @onready var BackButton = $Back
 @onready var JoinButton = $Join
 @onready var NewButton = $New
@@ -50,38 +50,41 @@ func _ready() -> void:
 	$YesWatch.visible = false
 	$NoWatch.visible = false
 	
-	GuestButton.visible = true
-	RegularButton.visible = true
+	#GuestButton.visible = true
+	#RegularButton.visible = true
 	BackButton.visible = true
 	Title.visible = true
 	Subtitle.visible = true
-	
-	$/root/main/GameControls.visible = false
-	
-
-func _on_guest_pressed() -> void:
-	RegularButton.visible = false
-	GuestButton.visible = false
-	
 	NameBox.visible = true
 	NameLabel.visible = true
 	NameConfirm.visible = true
 	
+	$/root/main/GameControls.visible = false
+	
+#
+#func _on_guest_pressed() -> void:
+	##RegularButton.visible = false
+	##GuestButton.visible = false
+	#
+	#NameBox.visible = true
+	#NameLabel.visible = true
+	#NameConfirm.visible = true
+	#
 	
 	
-func _on_regular_pressed() -> void:
-	#back to start for now, eventually will have login
-	RegularButton.visible = true
-	GuestButton.visible = true
-	JoinButton.visible = false
-	NewButton.visible = false
+#func _on_regular_pressed() -> void:
+	##back to start for now, eventually will have login
+	#RegularButton.visible = true
+	#GuestButton.visible = true
+	#JoinButton.visible = false
+	#NewButton.visible = false
 	
 func _on_back_pressed() -> void:
 
 	#brings back to start for now
 	#eventually have if elses to go to previous step
-	RegularButton.visible = true
-	GuestButton.visible = true
+	#RegularButton.visible = true
+	#GuestButton.visible = true
 	JoinButton.visible = false
 	NewButton.visible = false
 	EnterCodeLabel.visible = false
@@ -89,11 +92,12 @@ func _on_back_pressed() -> void:
 	CodeTextBox.visible = false
 	TimeDropDown.visible = false
 	TimeLabel.visible = false
-	NameBox.visible = false
-	NameLabel.visible = false
-	NameConfirm.visible = false
+	NameBox.visible = true
+	NameLabel.visible = true
+	NameConfirm.visible = true
 	GameTypeButton.visible = false
 	$NoNameEntered.visible = false
+	
 	
 	
 func _on_join_pressed() -> void:
@@ -129,9 +133,7 @@ func _on_play_pressed() -> void:
 	if newOrJoin == "join": 
 		if code.length() == 4: 
 			var intCode = code.to_int()
-			print("HELLO")
 			var temp = typeof(intCode)
-			print("%s" %temp)
 			joinGame.emit(intCode)
 		else:
 			$InvalidJoinGame.text = "game code must be 4 numbers" 
@@ -152,6 +154,7 @@ func _on_play_pressed() -> void:
 	Title.visible = false
 	Subtitle.visible = false
 	GameTypeButton.visible = false
+	$InvalidJoinGame.visible = false
 
 
 

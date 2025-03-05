@@ -16,6 +16,8 @@ func _ready() -> void:
 	style.corner_radius_top_right = 20
 	style.corner_radius_bottom_left = 20
 	style.corner_radius_bottom_right = 20
-	add_theme_stylebox_override("panel", style)
+	#add_theme_stylebox_override("panel", style)
 	$PanelContainer.add_theme_stylebox_override("panel", style)
+	$PanelContainer/VBoxContainer/RichTextLabel.bbcode_enabled = true
 	
+	$PanelContainer/ChatLabel.visible = true

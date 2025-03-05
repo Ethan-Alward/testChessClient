@@ -571,13 +571,18 @@ func GameControlsVisible(isOn):
 
 
 func _on_send_button_pressed() -> void:
-	var curText = $GameControls/PanelContainer/VBoxContainer/HBoxContainer2/LineEdit.text	
-	curText = curText + "\n"
-	$GameControls/PanelContainer/VBoxContainer/HBoxContainer2/LineEdit.text = ""	
-	$GameControls/PanelContainer/VBoxContainer/TextEdit.text += curText
-	$GameControls/PanelContainer/VBoxContainer/TextEdit.scroll_vertical = INF
 	
-	rpc_id(1, "sendText", curText, myID, code)
+
+	
+	var curText = $GameControls/PanelContainer/VBoxContainer/HBoxContainer2/LineEdit.text
+	
+	if curText.length() > 1:
+						
+		var sendingText = str("[left] ",theUsername,": ", curText, "\n[/left]")
+		$GameControls/PanelContainer/VBoxContainer/HBoxContainer2/LineEdit.text = ""	
+		$GameControls/PanelContainer/VBoxContainer/RichTextLabel.text += sendingText
+		rpc_id(1, "sendText", curText, myID, code)
+		$GameControls/PanelContainer/ChatLabel.visible = false
 
 
 
@@ -587,8 +592,8 @@ func sendText(_text, _myID, _code):
 	
 @rpc("any_peer")
 func receiveText(text):
-	$GameControls/PanelContainer/VBoxContainer/TextEdit.text += text
-	$GameControls/PanelContainer/VBoxContainer/TextEdit.scroll_vertical = INF
+	$GameControls/PanelContainer/VBoxContainer/RichTextLabel.text += text
+	$GameControls/PanelContainer/ChatLabel.visible = false
 	
 	
 	
