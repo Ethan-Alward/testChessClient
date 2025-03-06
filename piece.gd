@@ -44,7 +44,7 @@ func _ready() -> void:
 	#print("finished piece.gd ready")
 
 func move_to(notation):
-	num_moves = 1
+	num_moves = 1 #piece has moved
 	Global.check_capture(notation)
 	set_square(notation)
 	Global.game_state.is_white_turn = !Global.game_state.is_white_turn

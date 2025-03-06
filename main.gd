@@ -40,8 +40,11 @@ var selectedPieceOrigColour
 
 var inCheck
 var myKingsPos
+var kingRookPieceInfo
+var queenRookPieceInfo
 var checkmate
 var firstMoveMade
+var backRank
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:	
 	checkmate = false
@@ -222,9 +225,14 @@ func sendOppTheyWon():
 	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "You have Checkmated your Opponent"
 	$EndGameDisplay.visible = true
 
-func updateGameState(): 
+func updateGameState(squareImGoingTo, pieceInfo): 
 	#update every legal_move and attackable squares for every piece on the board 
 	#update opponent's legal_moves first so a change doesn't break my pieces legal moves
+	
+	#if en passant just happened delete the pawn that got captured
+	deleteIfEnPassant(squareImGoingTo, pieceInfo)	
+	checkIfRookNeedsToBeCastled(squareImGoingTo, pieceInfo)
+	
 	for piece in Global.piece_list:
 		if piece.is_white != iAmWhitePieces:
 			piece.get_legal_moves()
@@ -237,7 +245,69 @@ func updateGameState():
 		#save my king's position 
 		if piece.type == Global.PIECE_TYPE.king and piece.is_white == iAmWhitePieces: 
 			myKingsPos = piece
+			
+		if piece.type == Global.PIECE_TYPE.rook and piece.is_white == iAmWhitePieces and piece.square.column == 'a':
+			queenRookPieceInfo = piece.pieceInfo()
+			
+		if piece.type == Global.PIECE_TYPE.rook and piece.is_white == iAmWhitePieces and piece.square.column == 'h':
+			kingRookPieceInfo = piece.pieceInfo()
 	
+	
+	
+	#check if en passant can happen
+	#add a legal move to the pawns that can en passant 
+	checkIfEnPassantJustHappened(squareImGoingTo, pieceInfo)
+	
+	#add king's ability to castle
+	var kingSideCastle = true
+	var queenSideCastle = true
+	var myKingsPieceInfo = myKingsPos.pieceInfo()	
+
+	
+	if myKingsPieceInfo.num_moves == 0: #king hasn't moved
+		#king side castle
+		if kingRookPieceInfo.num_moves == 0: 
+			#check no pieces between them 			
+			if  Global.check_square({'column' : 'f', 'row': backRank}) == null and  Global.check_square({'column' : 'g', 'row': backRank}) == null: 
+				#check if any opponent pieces have legal moves in these squares
+				for x in Global.piece_list: 
+					if x.is_white != iAmWhitePieces:
+						for xMove in x.legal_moves:
+							if xMove.row == backRank and (xMove.column == 'f' or xMove.column == 'g'): 
+								kingSideCastle = false
+		
+			else:
+				kingSideCastle = false
+		else:	
+			kingSideCastle = false
+		
+		#queen side castle
+		if queenRookPieceInfo.num_moves == 0: 
+			if  Global.check_square({'column' : 'd', 'row': backRank}) == null and  Global.check_square({'column' : 'c', 'row': backRank}) == null and Global.check_square({'column' : 'b', 'row': backRank}) == null: 
+				#check if any opponent pieces have legal moves in these squares
+				for x in Global.piece_list: 
+					if x.is_white != iAmWhitePieces:
+						for xMove in x.legal_moves:
+							if xMove.row == backRank and (xMove.column == 'd' or xMove.column == 'c'): 
+								queenSideCastle = false								
+			else:
+				queenSideCastle = false
+		else:
+				queenSideCastle = false
+	else: 
+		kingSideCastle = false
+		queenSideCastle = false
+
+	if kingSideCastle: 
+		myKingsPos.legal_moves.push_front({'column': 'g', 'row': backRank})
+	
+	if queenSideCastle: 
+		myKingsPos.legal_moves.push_front({'column': 'c', 'row': backRank})
+
+
+
+
+	#restrict non king pieces and their legal moves
 	#check for pins	
 	var numPiecesBlocking = 0 
 	var pieceBlocking = {}
@@ -279,6 +349,7 @@ func updateGameState():
 						pieceBlocking.legal_moves.erase(move)
 	
 
+	#restrict king moves
 	#check for checks	
 	for oppsPiece in Global.piece_list:
 			if oppsPiece.is_white != iAmWhitePieces: #opps pieces
@@ -330,6 +401,7 @@ func updateGameState():
 						if myKingsPos.legal_moves.is_empty():
 							#check if a piece can capture or block		
 							var canCapture = false
+							var canBlock = false
 							for myPiece in Global.piece_list:
 								if myPiece.is_white == iAmWhitePieces: #my piece
 									for myLegalMove in myPiece.legal_moves:
@@ -350,13 +422,13 @@ func updateGameState():
 												for squaresBetweenKing in oppsPiece.squares_to_king:
 													if myLegalMove.column == squaresBetweenKing.column and myLegalMove.row == squaresBetweenKing.row:
 														print("can block, ", oppsPiece.pieceInfo(), " with ", myPiece.pieceInfo())
-														
+														canBlock = true
 									
-								else:
-									#can't block this king of piece
-									#it's mate
-									checkmate = true
-									checkMate()
+							if !canBlock:
+								#can't block this king of piece
+								#it's mate
+								checkmate = true
+								checkMate()
 									
 
 
@@ -365,6 +437,7 @@ func updateGameState():
 func sendOppMove(square, pieceInfo):
 	#if square has piece on it, delete the piece
 	firstMoveMade = true 
+		
 	for x in Global.piece_list: 
 		#if the square I wanna go to has a piece on it remove it
 		if x.square.row == square.row and x.square.column == square.column:	
@@ -377,9 +450,10 @@ func sendOppMove(square, pieceInfo):
 		if  y.square.row == pieceInfo.square.row and y.square.column == pieceInfo.square.column:
 			y.set_square(square)
 			Global.game_state.selected_piece = y	
+			
 	
-	
-	updateGameState()
+	updateGameState(square, pieceInfo)
+
 	
 	myTurn = true
 	$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.text = "It is your turn!"
@@ -404,10 +478,12 @@ func isMyTurn(x):
 	Global.game_state.player_color = x
 	if x:
 		iAmWhitePieces = true
+		backRank = 1
 		$GameControls/PanelContainer/VBoxContainer/MyPiecesLabel.text = "You are the white pieces" 
 		$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.text = "It is your turn!"
 	else:
 		iAmWhitePieces = false
+		backRank = 8
 		$GameControls/PanelContainer/VBoxContainer/MyPiecesLabel.text = "You are the black pieces" 
 		$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.text = "not your turn yet.."
 		
@@ -473,9 +549,8 @@ func theUsernamePasser(theName):
 	
 
 func _on_leave_button_pressed() -> void:
-	endGame()
 	rpc_id(1, "leftGame", myID, code)
-
+	endGame()
 
 
 func _on_disconnected_button_pressed() -> void:
@@ -556,9 +631,18 @@ func makeMove():
 	if is_legal(squareClicked.get_notation(), legal_moves):
 		var pieceInfo = Global.game_state.selected_piece.pieceInfo() 								
 		#send move to server who sends it to opponent 
-		serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)								
-		#make move on my screen
-		Global.game_state.selected_piece.move_to(squareClicked.get_notation())
+		serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)	
+		deleteIfEnPassant(squareClicked.get_notation(), pieceInfo)					
+		checkIfRookNeedsToBeCastled(squareClicked.get_notation(), pieceInfo)
+		var promotion = checkPromotion(squareClicked.get_notation(), pieceInfo)
+			
+		if !promotion:
+			Global.game_state.selected_piece.move_to(squareClicked.get_notation())
+	
+		
+		
+
+				
 		myTurn = false
 		$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.text = "It is not your turn"
 		
@@ -617,5 +701,101 @@ func receiveText(text):
 	
 	
 	
+func deleteIfEnPassant(square, pieceInfo):
+	print("start of deleting piece captured en passant")
+	print(square)
+	print(pieceInfo)
+	if pieceInfo.type == Global.PIECE_TYPE.pawn and pieceInfo.square.column != square.column: 
+		for z in Global.piece_list: 
+			if pieceInfo.is_white == true: 
+				if z.square.row + 1 == square.row and z.square.column == square.column:
+					Global.piece_list.erase(z)
+					z.queue_free()
+			if pieceInfo.is_white == false: 
+				if z.square.row - 1 == square.row and z.square.column == square.column:
+					Global.piece_list.erase(z)
+					z.queue_free()
+	print("end of deleting piece captured en passant")
+	
+func checkIfEnPassantJustHappened(square, pieceInfo):	
+	if pieceInfo.type == Global.PIECE_TYPE.pawn: 
+		if pieceInfo.is_white == false: 
+			#if pawn just moved two squares
+			if pieceInfo.square.row == 7 and square.row == 5: 
+			#check if there is a pawn that can en passant it
+				for x in Global.piece_list: 
+					if x.type == Global.PIECE_TYPE.pawn and x.is_white == true and x.square.row == 5:
+						#print("initial column: %s" %square.column)
+						#print("column 1 up: %s" %char(square.column.unicode_at(0) - 1))
+						if x.square.column == char(square.column.unicode_at(0) + 1)  or x.square.column == char(square.column.unicode_at(0) - 1):
+							#set x's legal moves to include enpassant
+							x.legal_moves.push_front({'column': square.column, 'row': 6})
+								
+		if pieceInfo.is_white == true: 
+			#if pawn just moved two squares
+			if pieceInfo.square.row == 2 and square.row == 4: 
+			 #check if there is a pawn that can en passant it
+				for x in Global.piece_list: 
+					if x.type == Global.PIECE_TYPE.pawn and x.is_white == false and x.square.row == 4:
+						#print("initial column: %s" %square.column)
+						#print("column 1 up: %s" %char(square.column.unicode_at(0) - 1))
+						if x.square.column == char(square.column.unicode_at(0) + 1)  or x.square.column == char(square.column.unicode_at(0) - 1):
+							#set x's legal moves to include enpassant
+							x.legal_moves.push_front({'column': square.column, 'row': 3})
+							
+							
+							
+							
+func checkIfRookNeedsToBeCastled(square, pieceInfo):
+	print("checking castling")
+	print(square)
+	print(pieceInfo)
+	
+	var tempBackRank	
+	if pieceInfo.is_white: 
+		tempBackRank = 1
+	else: 
+		tempBackRank = 8
+	
+	if pieceInfo.type == Global.PIECE_TYPE.king: 
+		#king moves 2 spots
+		if abs(square.column.unicode_at(0) - pieceInfo.square.column.unicode_at(0)) > 1: 
+			if square.column == 'g': 
+				for x in Global.piece_list:
+					if x.type == Global.PIECE_TYPE.rook and x.square.column == 'h' and x.square.row == tempBackRank and x.is_white == pieceInfo.is_white: 
+						x.set_square({'column': 'f', 'row': tempBackRank})
+				
+			if square.column == 'c': 
+				for x in Global.piece_list:
+					if x.type == Global.PIECE_TYPE.rook and x.square.column == 'a' and x.square.row == tempBackRank and x.is_white == pieceInfo.is_white: 
+						x.set_square({'column': 'd', 'row': tempBackRank})
+				
 	
 	
+	
+	
+func checkPromotion(square, pieceInfo) -> bool: 
+	var oppsBackRank 
+	if pieceInfo.is_white:
+		oppsBackRank == 8
+	else: 
+		oppsBackRank == 1
+	
+	if pieceInfo.type == Global.PIECE_TYPE.pawn and square.row == oppsBackRank:
+		
+		#delete pawn
+		for pawn in Global.piece_list: 
+			if pawn.square.column == square.column and pawn.square.row == square.row: 
+				Global.piece_list.erase(pawn)
+				pawn.queue_free()
+				
+		#add queen
+		var newQueen = piece_template.instantiate()
+		newQueen.type = Global.PIECE_TYPE.queen
+		newQueen.is_white = pieceInfo.is_white
+		newQueen.set_square(square)
+		Global.piece_list.push_front(newQueen)
+		add_child(newQueen)
+		return true
+		
+	return false
