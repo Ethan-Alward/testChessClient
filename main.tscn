@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://c10jyjqno4uob"]
+[gd_scene load_steps=26 format=3 uid="uid://c10jyjqno4uob"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_c5b25"]
 [ext_resource type="PackedScene" uid="uid://bw0pevh1wrku7" path="res://board.tscn" id="1_n0yl5"]
@@ -14,6 +14,8 @@
 [ext_resource type="AudioStream" uid="uid://bnunvhugk706f" path="res://notify.mp3" id="12_i6pyx"]
 [ext_resource type="AudioStream" uid="uid://6msjmjdctd22" path="res://move-self.mp3" id="13_4uwf8"]
 [ext_resource type="AudioStream" uid="uid://dox1q0xmxhouh" path="res://capture.mp3" id="14_afhbs"]
+[ext_resource type="Script" path="res://myTimer.gd" id="15_a7klx"]
+[ext_resource type="Script" path="res://opps_timer.gd" id="16_uvyad"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_cxyr4"]
 shader = ExtResource("5_8ys2h")
@@ -181,12 +183,17 @@ offset_top = 219.0
 offset_right = 391.0
 offset_bottom = 277.0
 tooltip_text = "Time"
-item_count = 3
+alignment = 1
+selected = 0
+allow_reselect = true
+item_count = 4
 popup/item_0/text = "10 Minute"
-popup/item_1/text = "3 Minute"
+popup/item_1/text = "5 Minute"
 popup/item_1/id = 1
-popup/item_2/text = "No Time Limit"
+popup/item_2/text = "3 Minute"
 popup/item_2/id = 2
+popup/item_3/text = "No Time Limit"
+popup/item_3/id = 3
 
 [node name="TimeControlText" type="Label" parent="Homepage"]
 layout_mode = 0
@@ -346,6 +353,21 @@ text = "opp"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="HBoxContainer3" type="HBoxContainer" parent="GameControls/PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="MyTime" type="Label" parent="GameControls/PanelContainer/VBoxContainer/HBoxContainer3"]
+custom_minimum_size = Vector2(116, 0)
+layout_mode = 2
+text = "0:00"
+horizontal_alignment = 1
+
+[node name="OppsTime" type="Label" parent="GameControls/PanelContainer/VBoxContainer/HBoxContainer3"]
+custom_minimum_size = Vector2(116, 0)
+layout_mode = 2
+text = "0:00"
+horizontal_alignment = 1
+
 [node name="MyPiecesLabel" type="Label" parent="GameControls/PanelContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
@@ -499,6 +521,11 @@ size_flags_vertical = 4
 texture = ExtResource("10_g1bha")
 stretch_mode = 2
 
+[node name="LeaveButton" type="Button" parent="LoadingScreen/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Leave Game"
+icon_alignment = 1
+
 [node name="Start" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("12_i6pyx")
 
@@ -507,6 +534,12 @@ stream = ExtResource("13_4uwf8")
 
 [node name="Capture" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("14_afhbs")
+
+[node name="myTimer" type="Timer" parent="."]
+script = ExtResource("15_a7klx")
+
+[node name="oppsTimer" type="Timer" parent="."]
+script = ExtResource("16_uvyad")
 
 [connection signal="pressed" from="Homepage/Back" to="Homepage" method="_on_back_pressed"]
 [connection signal="pressed" from="Homepage/New" to="Homepage" method="_on_new_pressed"]
@@ -521,3 +554,6 @@ stream = ExtResource("14_afhbs")
 [connection signal="pressed" from="GameControls/PanelContainer/VBoxContainer/HBoxContainer2/SendButton" to="." method="_on_send_button_pressed"]
 [connection signal="pressed" from="GameControls/PanelContainer/VBoxContainer/LeaveButton" to="." method="_on_leave_button_pressed"]
 [connection signal="pressed" from="EndGameDisplay/PanelContainer/VBoxContainer/DisconnectedButton" to="." method="_on_disconnected_button_pressed"]
+[connection signal="pressed" from="LoadingScreen/PanelContainer/VBoxContainer/LeaveButton" to="." method="_on_leave_button_pressed"]
+[connection signal="timeout" from="myTimer" to="." method="_on_my_timer_timeout"]
+[connection signal="timeout" from="oppsTimer" to="." method="_on_opps_timer_timeout"]

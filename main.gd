@@ -45,6 +45,9 @@ var queenRookPieceInfo
 var checkmate
 var firstMoveMade
 var backRank
+
+var gameTime
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:	
 	checkmate = false
@@ -52,6 +55,8 @@ func _ready() -> void:
 	code = 0
 	myID = 0
 	oppId = 0
+	
+
 	
 	
 	print("Connecting To Server ...")	
@@ -73,6 +78,8 @@ func _ready() -> void:
 	homepage.connect("joinGame", joinTheGame.bind())
 	homepage.connect("newGame", newGame.bind())
 	homepage.connect("theUsername", theUsernamePasser.bind())
+	homepage.connect("time", setGameTime.bind())
+
 	
 	#homepage.newGame.connect(newGame.bind())
 	
@@ -91,7 +98,7 @@ func joinTheGame(gameCode):
 
 func newGame(): 	
 	print("NEW GAME")
-	rpc_id(1, "createNewGame", myID, theUsername)
+	rpc_id(1, "createNewGame", myID, theUsername, gameTime)
 
 
 
@@ -143,22 +150,14 @@ func startGame():
 		#print("piece add as child")
 	
 	GameControlsVisible(true)
+	flipTimers()
 
-	
-	#codeLabel.visible = true
-	#oppLabel.visible = true
-	#leaveButton.visible = true
-	#myPiecesLabel.visible = true
-	#$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.visible = true
-	#$GameControls/PanelContainer/VBoxContainer/HBoxContainer/MyNameLabel.visible = true
-	
-	#$GameControls/PanelContainer/VBoxContainer/HBoxContainer/OpponentLabel.text = " vs %s" %oppName
-	#codeLabel.text = "Code: %s" %code
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-		
+	
 	if inGame && myTurn:	
+		
 		# ray casting
 		if Input.is_action_just_pressed("click"):
 			var space_state = get_world_3d().direct_space_state
@@ -459,6 +458,7 @@ func sendOppMove(square, pieceInfo):
 
 	
 	myTurn = true
+	flipTimers()
 	$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.text = "It is your turn!"
 
 
@@ -548,10 +548,10 @@ func theUsernamePasser(theName):
 	$GameControls/PanelContainer/VBoxContainer/HBoxContainer/MyNameLabel.text = theUsername
 	$LoadingScreen/PanelContainer/VBoxContainer/SubLabel.text = "Welcome %s" %theUsername
 	
-
 	
 
 func _on_leave_button_pressed() -> void:
+	loadingScreenVisible(false)
 	rpc_id(1, "leftGame", myID, code)
 	endGame()
 
@@ -635,16 +635,16 @@ func makeMove():
 		var pieceInfo = Global.game_state.selected_piece.pieceInfo() 								
 		#send move to server who sends it to opponent 
 		serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)	
+		
+		
 		deleteIfEnPassant(squareClicked.get_notation(), pieceInfo)					
 		checkIfRookNeedsToBeCastled(squareClicked.get_notation(), pieceInfo)
 		
 		Global.game_state.selected_piece.move_to(squareClicked.get_notation())
-		checkPromotion(squareClicked.get_notation(), pieceInfo)
+		checkPromotion(squareClicked.get_notation(), pieceInfo)				
 		
-		
-
-				
 		myTurn = false
+		flipTimers()
 		$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.text = "It is not your turn"
 		
 	clearPotentialMoveColors()
@@ -806,3 +806,49 @@ func checkPromotion(square, pieceInfo):
 					Global.piece_list.erase(pawn)
 					pawn.queue_free()
 					
+					
+					
+func setGameTime(selectedTime): 
+	match selectedTime:
+		0: 	
+			gameTime = 10
+		1: 	
+			gameTime = 5
+		2: 	
+			gameTime = 3			
+		3: 	
+			gameTime = INF
+			
+			
+
+func _on_my_timer_timeout() -> void:
+	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "You have ran out of time"	
+	$EndGameDisplay.visible = true
+
+
+func _on_opps_timer_timeout() -> void:
+	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "Your opponent has run out of time"	
+	$EndGameDisplay.visible = true
+	
+	
+@rpc("any_peer")
+func recieveTime(time):
+	gameTime = time
+	$myTimer.setGameTime(gameTime)
+	$oppsTimer.setGameTime(gameTime)
+	
+func flipTimers(): 
+	if myTurn:
+		$myTimer.setMyTurn(true)
+		$myTimer.start()
+		
+		$oppsTimer.setMyTurn(false)
+		$oppsTimer.is_paused()
+	else:
+		$myTimer.is_paused()
+		$myTimer.setMyTurn(false)
+		
+		$oppsTimer.start()
+		$oppsTimer.setMyTurn(true)
+	
+	

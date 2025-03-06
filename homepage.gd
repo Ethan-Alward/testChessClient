@@ -25,7 +25,8 @@ var newOrJoin : String
 signal joinGame(code)
 signal newGame
 signal theUsername(theName)
-
+signal time(timeSelected)
+var timeOption
 
 #4. give user the ability to resign / leave game	
 	#-disconnect from server
@@ -97,7 +98,7 @@ func _on_back_pressed() -> void:
 	NameConfirm.visible = true
 	GameTypeButton.visible = false
 	$NoNameEntered.visible = false
-	
+	$InvalidJoinGame.visible = false
 	
 	
 func _on_join_pressed() -> void:
@@ -128,15 +129,13 @@ func _on_new_pressed() -> void:
 func _on_play_pressed() -> void:
 	#try joining the game
 	theUsername.emit(theName)
-
+	timeOption = $Time.get_selected_id()
+	time.emit(timeOption)
+	print(timeOption)
 	
 	if newOrJoin == "join": 
-		if code.length() == 4: 
-			var intCode = code.to_int()
-			joinGame.emit(intCode)
-		else:
-			$InvalidJoinGame.text = "game code must be 4 numbers" 
-			$InvalidJoinGame.visible = true
+		var intCode = code.to_int()
+		joinGame.emit(intCode)
 	else: 
 		newGame.emit()
 		
