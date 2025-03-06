@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://c10jyjqno4uob"]
+[gd_scene load_steps=24 format=3 uid="uid://c10jyjqno4uob"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_c5b25"]
 [ext_resource type="PackedScene" uid="uid://bw0pevh1wrku7" path="res://board.tscn" id="1_n0yl5"]
@@ -11,6 +11,9 @@
 [ext_resource type="Script" path="res://game_controls.gd" id="8_57441"]
 [ext_resource type="Texture2D" uid="uid://djgbqifdvpv0f" path="res://LoadingImage.jpg" id="10_g1bha"]
 [ext_resource type="Script" path="res://loading_screen.gd" id="10_hxqcu"]
+[ext_resource type="AudioStream" uid="uid://bnunvhugk706f" path="res://notify.mp3" id="12_i6pyx"]
+[ext_resource type="AudioStream" uid="uid://6msjmjdctd22" path="res://move-self.mp3" id="13_4uwf8"]
+[ext_resource type="AudioStream" uid="uid://dox1q0xmxhouh" path="res://capture.mp3" id="14_afhbs"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_cxyr4"]
 shader = ExtResource("5_8ys2h")
@@ -495,6 +498,15 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("10_g1bha")
 stretch_mode = 2
+
+[node name="Start" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("12_i6pyx")
+
+[node name="Move" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("13_4uwf8")
+
+[node name="Capture" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("14_afhbs")
 
 [connection signal="pressed" from="Homepage/Back" to="Homepage" method="_on_back_pressed"]
 [connection signal="pressed" from="Homepage/New" to="Homepage" method="_on_new_pressed"]

@@ -113,6 +113,7 @@ func startGame():
 	print("game started from server call")
 	
 	loadingScreenVisible(false)
+	$Start.play()
 	
 	inGame = true
 	firstMoveMade = false
@@ -444,13 +445,15 @@ func sendOppMove(square, pieceInfo):
 			#delete piece 
 			Global.piece_list.erase(x)
 			x.queue_free()
+			$Capture.play()
+			
 				
 		#fnd the piece being moved and move it
 	for y in Global.piece_list: 
 		if  y.square.row == pieceInfo.square.row and y.square.column == pieceInfo.square.column:
 			y.set_square(square)
 			Global.game_state.selected_piece = y	
-			
+			$Move.play()
 	
 	updateGameState(square, pieceInfo)
 
@@ -778,8 +781,7 @@ func checkIfRookNeedsToBeCastled(square, pieceInfo):
 	
 	
 	
-func checkPromotion(square, pieceInfo): 
-	
+func checkPromotion(square, pieceInfo): 	
 	var oppsBackRank
 	if pieceInfo.is_white:
 		oppsBackRank = 8
