@@ -47,7 +47,7 @@ func move_to(notation):
 	num_moves = 1 #piece has moved
 	Global.check_capture(notation)
 	set_square(notation)
-	Global.game_state.is_white_turn = !Global.game_state.is_white_turn
+	#Global.game_state.is_white_turn = !Global.game_state.is_white_turn
 
 func set_square(notation):
 	square.column = notation.column
@@ -83,11 +83,11 @@ func get_attackable_squares():
 	match type:		
 		#pawns can only attack/defend diagnol
 		Global.PIECE_TYPE.pawn:
-			attackable_squares = PieceMovements.pawnA(is_white, square, num_moves)
+			attackable_squares = PieceMovements.pawnA(is_white, square)
 			
 		#king attacks every square around it
 		Global.PIECE_TYPE.king:
-			attackable_squares = PieceMovements.kingA(is_white, square)
+			attackable_squares = PieceMovements.kingA(square)
 			
 		#can see the whole board
 		Global.PIECE_TYPE.bishop:

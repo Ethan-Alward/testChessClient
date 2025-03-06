@@ -127,8 +127,7 @@ func king(is_white, curr_notation):
 		
 	var isPieceNearKing = false
 	var thePieceNearKing
-	var numPiecesBlocking = 0
-	var	pieceBlocking 
+
 	#remove the ability to capture a defended opponent's piece
 	for oppsPiece in Global.piece_list:
 		if oppsPiece.is_white != is_white: #opps pieces
@@ -212,7 +211,7 @@ func queenA(is_white, curr_notation):
 	return collect_attackable_squares(is_white, curr_notation, directions)
 	
 
-func pawnA(is_white, curr_notation, num_moves):
+func pawnA(is_white, curr_notation):
 	var direction = 1
 	if !is_white:
 		direction = -1
@@ -233,7 +232,7 @@ func pawnA(is_white, curr_notation, num_moves):
 		
 	return squares
 
-func kingA(is_white, curr_notation):
+func kingA(curr_notation):
 	var moves = []
 	var directions = [
 		Vector2(1, 0), Vector2(-1, 0),

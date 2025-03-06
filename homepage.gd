@@ -133,7 +133,6 @@ func _on_play_pressed() -> void:
 	if newOrJoin == "join": 
 		if code.length() == 4: 
 			var intCode = code.to_int()
-			var temp = typeof(intCode)
 			joinGame.emit(intCode)
 		else:
 			$InvalidJoinGame.text = "game code must be 4 numbers" 

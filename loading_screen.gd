@@ -5,7 +5,7 @@ var isOnQ
 func _ready() -> void:
 	$PanelContainer/VBoxContainer.add_theme_constant_override("separation", 10) 
 	isOnQ = false
-	$PanelContainer/VBoxContainer/TextureRect.pivot_offset = Vector2(70,117/2)
+	$PanelContainer/VBoxContainer/TextureRect.pivot_offset = Vector2(70,58.5)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -85,8 +85,7 @@ func _ready() -> void:
 func joinTheGame(gameCode):
 	wantsToWatch = false
 	joinGame.rpc(myID, gameCode, theUsername, wantsToWatch)	
-	code = gameCode
-
+	code = int(gameCode)
 	
 
 
@@ -232,6 +231,7 @@ func updateGameState(squareImGoingTo, pieceInfo):
 	#if en passant just happened delete the pawn that got captured
 	deleteIfEnPassant(squareImGoingTo, pieceInfo)	
 	checkIfRookNeedsToBeCastled(squareImGoingTo, pieceInfo)
+	checkPromotion(squareImGoingTo, pieceInfo)
 	
 	for piece in Global.piece_list:
 		if piece.is_white != iAmWhitePieces:
@@ -256,7 +256,7 @@ func updateGameState(squareImGoingTo, pieceInfo):
 	
 	#check if en passant can happen
 	#add a legal move to the pawns that can en passant 
-	checkIfEnPassantJustHappened(squareImGoingTo, pieceInfo)
+	checkIfEnPassantCanHappen(squareImGoingTo, pieceInfo)
 	
 	#add king's ability to castle
 	var kingSideCastle = true
@@ -634,11 +634,9 @@ func makeMove():
 		serverIsLegal.rpc(oppId,squareClicked.get_notation(), pieceInfo)	
 		deleteIfEnPassant(squareClicked.get_notation(), pieceInfo)					
 		checkIfRookNeedsToBeCastled(squareClicked.get_notation(), pieceInfo)
-		var promotion = checkPromotion(squareClicked.get_notation(), pieceInfo)
-			
-		if !promotion:
-			Global.game_state.selected_piece.move_to(squareClicked.get_notation())
-	
+		
+		Global.game_state.selected_piece.move_to(squareClicked.get_notation())
+		checkPromotion(squareClicked.get_notation(), pieceInfo)
 		
 		
 
@@ -705,19 +703,25 @@ func deleteIfEnPassant(square, pieceInfo):
 	print("start of deleting piece captured en passant")
 	print(square)
 	print(pieceInfo)
-	if pieceInfo.type == Global.PIECE_TYPE.pawn and pieceInfo.square.column != square.column: 
-		for z in Global.piece_list: 
-			if pieceInfo.is_white == true: 
-				if z.square.row + 1 == square.row and z.square.column == square.column:
-					Global.piece_list.erase(z)
-					z.queue_free()
-			if pieceInfo.is_white == false: 
-				if z.square.row - 1 == square.row and z.square.column == square.column:
-					Global.piece_list.erase(z)
-					z.queue_free()
+	
+	#if there's a piece on the en passant square it is not en passant since the pawn couldn't've moved 2 squares
+	var isACapture = Global.check_square(square)
+	
+	if !isACapture:	
+		if pieceInfo.type == Global.PIECE_TYPE.pawn and pieceInfo.square.column != square.column: 
+			for z in Global.piece_list: 
+				if pieceInfo.is_white == true: 
+					if z.square.row == 5 and square.row == 6 and z.square.column == square.column:
+						Global.piece_list.erase(z)
+						z.queue_free()
+				if pieceInfo.is_white == false: 
+					if z.square.row == 4 and square.row == 3 and z.square.column == square.column:
+						Global.piece_list.erase(z)
+						z.queue_free()
+						
 	print("end of deleting piece captured en passant")
 	
-func checkIfEnPassantJustHappened(square, pieceInfo):	
+func checkIfEnPassantCanHappen(square, pieceInfo):	
 	if pieceInfo.type == Global.PIECE_TYPE.pawn: 
 		if pieceInfo.is_white == false: 
 			#if pawn just moved two squares
@@ -774,21 +778,16 @@ func checkIfRookNeedsToBeCastled(square, pieceInfo):
 	
 	
 	
-func checkPromotion(square, pieceInfo) -> bool: 
-	var oppsBackRank 
+func checkPromotion(square, pieceInfo): 
+	
+	var oppsBackRank
 	if pieceInfo.is_white:
-		oppsBackRank == 8
+		oppsBackRank = 8
 	else: 
-		oppsBackRank == 1
+		oppsBackRank = 1
 	
 	if pieceInfo.type == Global.PIECE_TYPE.pawn and square.row == oppsBackRank:
 		
-		#delete pawn
-		for pawn in Global.piece_list: 
-			if pawn.square.column == square.column and pawn.square.row == square.row: 
-				Global.piece_list.erase(pawn)
-				pawn.queue_free()
-				
 		#add queen
 		var newQueen = piece_template.instantiate()
 		newQueen.type = Global.PIECE_TYPE.queen
@@ -796,6 +795,12 @@ func checkPromotion(square, pieceInfo) -> bool:
 		newQueen.set_square(square)
 		Global.piece_list.push_front(newQueen)
 		add_child(newQueen)
-		return true
+		#Global.game_state.selected_piece = newQueen
 		
-	return false
+		#delete pawn
+		for pawn in Global.piece_list: 
+			if pawn.type == Global.PIECE_TYPE.pawn and pawn.square.column == square.column and pawn.square.row == oppsBackRank:  
+					print(pawn.pieceInfo())
+					Global.piece_list.erase(pawn)
+					pawn.queue_free()
+					
