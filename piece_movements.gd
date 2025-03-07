@@ -132,48 +132,67 @@ func king(is_white, curr_notation):
 	for oppsPiece in Global.piece_list:
 		if oppsPiece.is_white != is_white: #opps pieces
 			for myKingsMoves in moves: 
+				isPieceNearKing = false
 				if oppsPiece.square.column == myKingsMoves.column and oppsPiece.square.row == myKingsMoves.row: 
 				 	#if opps piece is on a square my king can capture check if the piece is defended
-					#check if any opps pieces have an attackable square that matches this opps square
-						#this changes based on piece type
-						#check if pawns, knights, or king's legal move is that square 
-						#if they do remove the move from my king's moves
+
 					isPieceNearKing = true
 					thePieceNearKing = oppsPiece
+					print("there is a piece near the king")
 					print(thePieceNearKing.pieceInfo())
 	
 					
-	if isPieceNearKing: #verify that this piece is being defended if it is delete that oppsPece.square from kings legal moves. 
-		for oppsPiece in Global.piece_list:
-			if oppsPiece.is_white != is_white: #opps pieces
-				for oppsPieceMove in oppsPiece.attackable_squares:
-					#check all opps pieces has an attackable_square that matches thePieceNearKing.sqaure
-					if oppsPieceMove.row == thePieceNearKing.square.row and oppsPieceMove.column == thePieceNearKing.square.column:
-						#if they do check that there are no pieces between them 
-							#only needed for bishops queens and rooks because nothing can block a kinght,pawn, or king's defense 
-						if oppsPiece.type == Global.PIECE_TYPE.queen or oppsPiece.type == Global.PIECE_TYPE.bishop or oppsPiece.type == Global.PIECE_TYPE.rook:
-							oppsPiece.get_squares_to_king(curr_notation)
-							
-							print("opps piece info: ", oppsPiece.pieceInfo())
-							print(oppsPiece.squares_to_king)
-							
-							var piecesBetweenKing = 0
-							for square in oppsPiece.squares_to_king:
-								for piece in Global.piece_list:
-										if piece.square.row == square.row and piece.square.column == square.column:
-											piecesBetweenKing += 1
-							if piecesBetweenKing == 0: 
-								print("apparently theres a piece between")
-								for move in moves:
-									if move.column == thePieceNearKing.square.column and move.row == thePieceNearKing.square.row:
-										moves.erase(move) #piece is defended
-								
-						#piece is defended by a pawn, knight, or king					
-						else:
-							for move in moves:
-									if move.column == thePieceNearKing.square.column and move.row == thePieceNearKing.square.row:
-										moves.erase(move) #piece is defended
-							#moves.erase(thePieceNearKing.square)  #piece is defended
+					if isPieceNearKing: #verify that this piece is being defended if it is delete that oppsPece.square from kings legal moves. 
+						for oppsPiece2 in Global.piece_list:
+							if oppsPiece2.is_white != is_white: #opps pieces
+								for oppsPieceMove in oppsPiece2.attackable_squares:
+									#check all opps pieces has an attackable_square that matches thePieceNearKing.sqaure
+									if oppsPieceMove.row == thePieceNearKing.square.row and oppsPieceMove.column == thePieceNearKing.square.column:
+										#if they do check that there are no pieces between them 
+											#only needed for bishops queens and rooks because nothing can block a kinght,pawn, or king's defense 
+										if oppsPiece2.type == Global.PIECE_TYPE.queen or oppsPiece2.type == Global.PIECE_TYPE.bishop or oppsPiece2.type == Global.PIECE_TYPE.rook:
+											#oppsPiece2.get_squares_to_king(curr_notation)
+											
+											#
+											#print("opps piece info: ", oppsPiece2.pieceInfo())
+											print(oppsPiece2.squares_to_king)
+											#
+											
+											
+											#needs to be called from main
+											#var squaresBetweenOppPieces = get_squares_between(oppsPiece2, isPieceNearKing.square)
+											#var isPieceBetweenOppPieces = false
+											#for square in squaresBetweenOppPieces: 
+												#if square.check_square():
+													#isPieceBetweenOppPieces = true
+											#
+											#if !isPieceBetweenOppPieces: 
+												#for move in moves.duplicate():
+													#if move.column == thePieceNearKing.square.column and move.row == thePieceNearKing.square.row:
+														#moves.erase(move)
+											#
+											
+											
+											
+											
+											#gonna be deleted
+											#var piecesBetweenKing = 0
+											#for square in oppsPiece2.squares_to_king:
+												#for piece in Global.piece_list:
+														#if piece.square.row == square.row and piece.square.column == square.column:
+															#piecesBetweenKing += 1
+											#if piecesBetweenKing == 0: 
+												#print("apparently theres a piece between")
+												#for move in moves:
+													#if move.column == thePieceNearKing.square.column and move.row == thePieceNearKing.square.row:
+														#moves.erase(move) #piece is defended
+												
+										#piece is defended by a pawn, knight, or king					
+										else:
+											for move in moves.duplicate():
+												if move.column == thePieceNearKing.square.column and move.row == thePieceNearKing.square.row:
+													moves.erase(move) #piece is defended
+											#moves.erase(thePieceNearKing.square)  #piece is defended
 								
 										
 						
@@ -319,13 +338,19 @@ func collect_squares_to_king(_is_white, start_notation, directions, squareKingIs
 		
 		for square in tempResult: 
 			if square.column == squareKingIsOn.column and square.row == squareKingIsOn.row:
-				tempResult.erase(square)
-				#print("correct result: ", tempResult)
+				var index = tempResult.find(square)
+				tempResult = tempResult.slice(0, index)
+				print("correct result: ", tempResult)
 				result = tempResult
-				break
+				return result
 				
 		
 		#if code reaches here reset the result 
 		tempResult = []
 
+	#code shouldn't reach here
 	return result
+	
+	
+	
+	

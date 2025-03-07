@@ -175,7 +175,10 @@ func _process(_delta: float) -> void:
 					pieceOnSquare = Global.check_square(squareClicked.get_notation())		
 				
 					#if there is a piece on it
-					if pieceOnSquare:						
+					if pieceOnSquare:		
+						print(pieceOnSquare.pieceInfo())
+						
+								
 						#if it is my coloured piece, set it to the selected piece
 						if pieceOnSquare.is_white == iAmWhitePieces:						
 							
@@ -212,9 +215,10 @@ func is_legal(square, legal_moves):
 func checkMate():
 	print("checkmate")
 	inGame = false
-	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "You have been Checkmated"
-	
-	$EndGameDisplay.visible = true
+	$myTimer.stop()
+	$oppsTimer.stop()	
+	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "You have been Checkmated"	
+	endGameDisplayVisible(true)
 	rpc_id(1, "sendOppTheyWon", myID, code)
 	
 	#Send signal to server saying you won! 
@@ -222,7 +226,7 @@ func checkMate():
 @rpc("any_peer") #when server runs this it makes the opponents move appear on your screen
 func sendOppTheyWon():	
 	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "You have Checkmated your Opponent"
-	$EndGameDisplay.visible = true
+	endGameDisplayVisible(true)
 
 func updateGameState(squareImGoingTo, pieceInfo): 
 	#update every legal_move and attackable squares for every piece on the board 
@@ -258,7 +262,9 @@ func updateGameState(squareImGoingTo, pieceInfo):
 	#add a legal move to the pawns that can en passant 
 	checkIfEnPassantCanHappen(squareImGoingTo, pieceInfo)
 	
-	#add king's ability to castle
+	
+	
+	#add king's ability to castle, assume they can, prove they can't
 	var kingSideCastle = true
 	var queenSideCastle = true
 	var myKingsPieceInfo = myKingsPos.pieceInfo()	
@@ -308,22 +314,27 @@ func updateGameState(squareImGoingTo, pieceInfo):
 
 
 	#restrict non king pieces and their legal moves
-	#check for pins	
-	var numPiecesBlocking = 0 
-	var pieceBlocking = {}
+	var numPiecesBlocking
+	var pieceBlocking
 	var kingIsAttacked = false
 	var moveIsLegal = false
-	
+	#check for pins	
 	for piece in Global.piece_list:
+		numPiecesBlocking = 0 
+		pieceBlocking = {}
+		
 		if ((piece.is_white != iAmWhitePieces) and (piece.type == Global.PIECE_TYPE.queen or piece.type == Global.PIECE_TYPE.bishop or piece.type == Global.PIECE_TYPE.rook)): #opps bishop queen or rook
+			
 			#check if my king is on an attackable square
 			for square in piece.attackable_squares: 
 				if square.column == myKingsPos.square.column and square.row == myKingsPos.square.row:
 					#check how many of my pieces are between my king and the attacking square
 					kingIsAttacked = true
+					print("King is currently attaccked by %s" %piece.pieceInfo())
 					
 			#check how many of my pieces are between my king and the attacking square
 			if kingIsAttacked:
+				kingIsAttacked = false #reset variable
 				#get squares between king and attacking piece
 				piece.get_squares_to_king(myKingsPos.square)
 				for square in piece.squares_to_king: 
@@ -332,14 +343,16 @@ func updateGameState(squareImGoingTo, pieceInfo):
 							if square.column == attackedPiece.square.column and square.row == attackedPiece.square.row:
 								numPiecesBlocking += 1
 								pieceBlocking = attackedPiece
+								print("King is currently blcoked by %s", pieceBlocking.pieceInfo())
 								
 			if numPiecesBlocking == 1: 
-				print("only one piece blocking: " , pieceBlocking)
+				print("only one piece blocking: %s" , pieceBlocking.pieceInfo())
 				#remove all legal moves from the attacked piece except for ones that are between the attacking opps piece and my king
-				for move in pieceBlocking.legal_moves: 
+				var tempBlockingLegalMoves = pieceBlocking.legal_moves.duplicate()
+				for move in tempBlockingLegalMoves: 
 					moveIsLegal = false
-					for move2 in piece.attackable_squares: 
-						if move.column == move2.column and move.row == move2.row:			
+					for pieceAttackingKingMove in piece.squares_to_king: 
+						if move.column == pieceAttackingKingMove.column and move.row == pieceAttackingKingMove.row:			
 							moveIsLegal	 = true
 							
 					if move.column == piece.square.column and move.row == piece.square.row:
@@ -347,7 +360,7 @@ func updateGameState(squareImGoingTo, pieceInfo):
 						 
 					if !moveIsLegal:
 						pieceBlocking.legal_moves.erase(move)
-	
+
 
 	#restrict king moves
 	#check for checks	
@@ -359,24 +372,19 @@ func updateGameState(squareImGoingTo, pieceInfo):
 						inCheck = true
 						print("in check")
 						# make it so the only legal moves for all my pieces are the ones that can get me out of check
-						#so that I don;t have to see a buncha bs potential moves show up on the board
-						
-						#edit all of my piece's legal_moves so they aren't 
-						
+						#so that I don't have to see a buncha bs potential moves show up on the board	
 						for myPiece in Global.piece_list:
-							if myPiece.is_white == iAmWhitePieces and myPiece.type != Global.PIECE_TYPE.king: #my pieces
-								#print("my piece: " , myPiece.pieceInfo(), " my pieces legal moves: ", myPiece.legal_moves)
-								
+							if myPiece.is_white == iAmWhitePieces and myPiece.type != Global.PIECE_TYPE.king: #my pieces								
 								var tempPieceLegalMoves = myPiece.legal_moves.duplicate()
-								for myPiecesLegalMove in tempPieceLegalMoves: 									
+								for myPiecesLegalMove in tempPieceLegalMoves:
+									#if opps piece is a range piece, I can block or capture
 									if oppsPiece.type == Global.PIECE_TYPE.bishop or oppsPiece.type == Global.PIECE_TYPE.queen or oppsPiece.type == Global.PIECE_TYPE.rook:
 										oppsPiece.get_squares_to_king(myKingsPos.square)
 	
 										moveIsLegal = false
-										for oppsPieceLegalMove in oppsPiece.squares_to_king:
+										for oppsPieceSquaresItCanSee in oppsPiece.squares_to_king:
 											#print("opps piece legal move ",oppsPieceLegalMove)
-																						
-											if myPiecesLegalMove.column == oppsPieceLegalMove.column and  myPiecesLegalMove.row == oppsPieceLegalMove.row: #can blcok
+											if myPiecesLegalMove.column == oppsPieceSquaresItCanSee.column and  myPiecesLegalMove.row == oppsPieceSquaresItCanSee.row: #can block
 												moveIsLegal = true
 												#print("this piece can block: ", myPiece.type, " on square:" ,myPiecesLegalMove)
 												
@@ -386,15 +394,14 @@ func updateGameState(squareImGoingTo, pieceInfo):
 												
 										if !moveIsLegal: 
 											myPiece.legal_moves.erase(myPiecesLegalMove)
-				
-									else:
-											if myPiecesLegalMove.column == oppsPiece.square.column and  myPiecesLegalMove.row ==  oppsPiece.square.row:
-												for myPiecesLegalMoves in myPiece.legal_moves:
-													if myPiecesLegalMoves.column == myPiecesLegalMove.column and myPiecesLegalMoves.row == myPiecesLegalMove.row: 
-														myPiece.legal_moves.erase(myPiecesLegalMoves)
 											
-								#print("POST deleting my piece: " , myPiece.pieceInfo(), " my pieces legal moves: ", myPiece.legal_moves)
-						
+									#if not a range piece, only non king moves allowed are to capture
+									else:
+										for myPiecesLegalMoves in tempPieceLegalMoves:
+											if myPiecesLegalMoves.column != oppsPiece.square.column or myPiecesLegalMoves.row == oppsPiece.square.row: 
+												myPiece.legal_moves.erase(myPiecesLegalMoves)
+											
+						#in check, check for checkmate
 						#check for checkmate
 						#king can't move
 						#print("myKing's legal moves: ", myKingsPos.legal_moves)
@@ -517,13 +524,8 @@ func endGame():
 func oppDisconnected():
 	#trigger end of game and error message
 	print("opp disconnected")
-	#oppDisconnected display
-	$EndGameDisplay.visible = true
-	$EndGameDisplay/PanelContainer.visible = true
-	$EndGameDisplay/PanelContainer/VBoxContainer.visible = true
-	$EndGameDisplay/PanelContainer/VBoxContainer/DisconnectedButton.visible = true
-	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "Your Opponent Has Been Disconnected"
-	$EndGameDisplay/PanelContainer/VBoxContainer/Label.visible = true
+	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "Your Opponent Has Been Disconnected"	
+	endGameDisplayVisible(true)
 
 @rpc("any_peer")
 func invalidJoinGame(isAGame):
@@ -558,7 +560,7 @@ func _on_leave_button_pressed() -> void:
 
 func _on_disconnected_button_pressed() -> void:
 	endGame()
-	$EndGameDisplay.visible = false
+	endGameDisplayVisible(false)
 
 
 	
@@ -672,8 +674,18 @@ func loadingScreenVisible(isOn):
 	$LoadingScreen/PanelContainer/VBoxContainer/SubLabel2.visible = isOn
 	$LoadingScreen/PanelContainer/VBoxContainer/SubLabel3.visible = isOn
 	$LoadingScreen/PanelContainer/VBoxContainer/TextureRect.visible = isOn
-	$LoadingScreen.isOn(true)
+	$LoadingScreen.isOn(isOn)
 	
+
+func endGameDisplayVisible(isOn):
+	$EndGameDisplay.visible = isOn
+	$EndGameDisplay/PanelContainer.visible = isOn
+	$EndGameDisplay/PanelContainer/VBoxContainer.visible = isOn
+	$EndGameDisplay/PanelContainer/VBoxContainer/DisconnectedButton.visible = isOn
+	$EndGameDisplay/PanelContainer/VBoxContainer/Label.visible = isOn
+
+	
+
 
 func _on_send_button_pressed() -> void:
 	var curText = $GameControls/PanelContainer/VBoxContainer/HBoxContainer2/LineEdit.text
@@ -703,9 +715,7 @@ func receiveText(text):
 	
 	
 func deleteIfEnPassant(square, pieceInfo):
-	print("start of deleting piece captured en passant")
-	print(square)
-	print(pieceInfo)
+
 	
 	#if there's a piece on the en passant square it is not en passant since the pawn couldn't've moved 2 squares
 	var isACapture = Global.check_square(square)
@@ -722,7 +732,7 @@ func deleteIfEnPassant(square, pieceInfo):
 						Global.piece_list.erase(z)
 						z.queue_free()
 						
-	print("end of deleting piece captured en passant")
+
 	
 func checkIfEnPassantCanHappen(square, pieceInfo):	
 	if pieceInfo.type == Global.PIECE_TYPE.pawn: 
@@ -754,9 +764,7 @@ func checkIfEnPassantCanHappen(square, pieceInfo):
 							
 							
 func checkIfRookNeedsToBeCastled(square, pieceInfo):
-	print("checking castling")
-	print(square)
-	print(pieceInfo)
+
 	
 	var tempBackRank	
 	if pieceInfo.is_white: 
@@ -795,7 +803,10 @@ func checkPromotion(square, pieceInfo):
 		newQueen.type = Global.PIECE_TYPE.queen
 		newQueen.is_white = pieceInfo.is_white
 		newQueen.set_square(square)
+		newQueen.get_legal_moves()
+		newQueen.get_attackable_squares()
 		Global.piece_list.push_front(newQueen)
+		print(Global.piece_list)
 		add_child(newQueen)
 		#Global.game_state.selected_piece = newQueen
 		
@@ -806,8 +817,7 @@ func checkPromotion(square, pieceInfo):
 					Global.piece_list.erase(pawn)
 					pawn.queue_free()
 					
-					
-					
+
 func setGameTime(selectedTime): 
 	match selectedTime:
 		0: 	
@@ -823,12 +833,12 @@ func setGameTime(selectedTime):
 
 func _on_my_timer_timeout() -> void:
 	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "You have ran out of time"	
-	$EndGameDisplay.visible = true
+	endGameDisplayVisible(true)
 
 
 func _on_opps_timer_timeout() -> void:
 	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "Your opponent has run out of time"	
-	$EndGameDisplay.visible = true
+	endGameDisplayVisible(true)
 	
 	
 @rpc("any_peer")

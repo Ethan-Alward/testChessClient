@@ -17,6 +17,18 @@ func _process(delta: float) -> void:
 		$/root/main/GameControls/PanelContainer/VBoxContainer/HBoxContainer3/MyTime.text = format_time(time)
 	
 	
+	
+	
+	
+	
+	
+	#change this so server passes times back and forth
+	
+	
+	
+	
+	
+	
 
 func setGameTime(timeSelected):	
 	match timeSelected:

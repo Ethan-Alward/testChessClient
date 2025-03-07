@@ -62,7 +62,7 @@ func update_position():
 func is_on(notation):
 	return Global.compare_square_notations(square, notation)
 	
-
+#legal piece moves, based on how pieces move. NOT RESTRICTED by pieces around them except the king function
 func get_legal_moves():
 	#print(square)
 	match type:
@@ -79,15 +79,13 @@ func get_legal_moves():
 		Global.PIECE_TYPE.king:
 			legal_moves = PieceMovements.king(is_white, square)
 
+
+#more like defendable squares
 func get_attackable_squares(): 
 	match type:		
 		#pawns can only attack/defend diagnol
 		Global.PIECE_TYPE.pawn:
-			attackable_squares = PieceMovements.pawnA(is_white, square)
-			
-		#king attacks every square around it
-		Global.PIECE_TYPE.king:
-			attackable_squares = PieceMovements.kingA(square)
+			attackable_squares = PieceMovements.pawnA(is_white, square)			
 			
 		#can see the whole board
 		Global.PIECE_TYPE.bishop:
@@ -100,7 +98,11 @@ func get_attackable_squares():
 		#king and knight's attackable/defendable squares are simply they're legal move squares
 		Global.PIECE_TYPE.knight:
 			attackable_squares = PieceMovements.knight(is_white, square)	
+		
+		Global.PIECE_TYPE.king:
+			attackable_squares = PieceMovements.kingA(square) #little different because we restrict king's legal moves in king function
 
+#returns the squares the long range pieces "sees" 
 func get_squares_to_king(squareKingIsOn): 
 	match type:		
 		Global.PIECE_TYPE.bishop:
@@ -109,3 +111,28 @@ func get_squares_to_king(squareKingIsOn):
 			squares_to_king = PieceMovements.rookK(is_white, square, squareKingIsOn)
 		Global.PIECE_TYPE.queen:
 			squares_to_king = PieceMovements.queenK(is_white, square, squareKingIsOn)
+			
+		#other pieces can't be blocked so return [] 
+		Global.PIECE_TYPE.pawn:
+				squares_to_king = []
+		Global.PIECE_TYPE.knight:
+				squares_to_king = []
+		Global.PIECE_TYPE.king:
+				squares_to_king = []
+
+#func get_squares_between(squareDefendedPieceisOn):
+	#match type:		
+		#Global.PIECE_TYPE.bishop:
+			#squares_to_king = PieceMovements.bishopK(is_white, square, squareKingIsOn)
+		#Global.PIECE_TYPE.rook:
+			#squares_to_king = PieceMovements.rookK(is_white, square, squareKingIsOn)
+		#Global.PIECE_TYPE.queen:
+			#squares_to_king = PieceMovements.queenK(is_white, square, squareKingIsOn)
+			#
+		##other pieces can't be blocked so return [] 
+		#Global.PIECE_TYPE.pawn:
+				#squares_to_king = []
+		#Global.PIECE_TYPE.knight:
+				#squares_to_king = []
+		#Global.PIECE_TYPE.king:
+				#squares_to_king = []

@@ -201,7 +201,7 @@ offset_left = 198.0
 offset_top = 184.0
 offset_right = 452.0
 offset_bottom = 207.0
-text = "Enter Desired Time Conrol Below"
+text = "Enter Desired Time Control Below"
 
 [node name="CodeTextBox" type="LineEdit" parent="Homepage"]
 layout_mode = 0
