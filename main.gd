@@ -80,10 +80,10 @@ func _ready() -> void:
 	homepage.connect("theUsername", theUsernamePasser.bind())
 	homepage.connect("time", setGameTime.bind())
 
-	
-	#homepage.newGame.connect(newGame.bind())
+
 	
 	GameControlsVisible(false)
+	$GameControls/GameCommunication.visible = false
 	loadingScreenVisible(false)
 	
 	
@@ -117,43 +117,32 @@ func loadingScreen():
 
 @rpc
 func startGame(): 	
-	print("game started from server call")
-	
+	print("game started from server call")	
 	loadingScreenVisible(false)
 	$Start.play()
 	
 	inGame = true
 	firstMoveMade = false
-
+	if !iAmWhitePieces:
+		$Camera3D.position.z = -7.564
+		$Camera3D.rotate_y(deg_to_rad(180))
 	
 	$GameControls/PanelContainer/VBoxContainer/HBoxContainer/MyNameLabel.text = theUsername
 	#set up board
-	#print("start of server handshake")
 	Global.server_hand_shake()
-	#print("end of server handshake")
-	#print("start of board start")
 	get_node("board").start()
-	#print("end of board start")
-	
+
 	for p in Global.initial_piece_state:
-		#print("adding piece to piece_list")
 		var piece = piece_template.instantiate()
-		#print("setting piece type")
 		piece.type =  p.type
 		piece.is_white = p.is_white
 		piece.set_square(p.square)
 		Global.piece_list.push_front(piece)
 		add_child(piece)
-		#print("piece add as child")
 	
 	GameControlsVisible(true)
-	
-	if !iAmWhitePieces:
-		$Camera3D.position.z = -7.564
-		$Camera3D.rotate_y(deg_to_rad(180))
-
-
-	
+	$myTimer.start()
+	$oppsTimer.start()
 	flipTimers()
 
 
@@ -389,8 +378,8 @@ func updateGameState(squareImGoingTo, pieceInfo):
 
 					isPieceNearKing = true
 					thePieceNearKing = oppsPiece
-					print("there is a piece near the king")
-					print(thePieceNearKing.pieceInfo())
+					#print("there is a piece near the king")
+					#print(thePieceNearKing.pieceInfo())
 	
 					
 					if isPieceNearKing: #verify that this piece is being defended if it is delete that oppsPece.square from kings legal moves. 
@@ -406,8 +395,8 @@ func updateGameState(squareImGoingTo, pieceInfo):
 											
 											#
 											#print("opps piece info: ", oppsPiece2.pieceInfo())
-											print(oppsPiece2.squares_to_king)
-											#
+											#print(oppsPiece2.squares_to_king)
+											
 											
 											
 											#needs to be called from main
@@ -532,9 +521,7 @@ func sendOppMove(square, pieceInfo):
 			Global.game_state.selected_piece = y	
 			$Move.play()
 	
-	updateGameState(square, pieceInfo)
-
-	
+	updateGameState(square, pieceInfo)	
 	myTurn = true
 	flipTimers()
 	$GameControls/PanelContainer/VBoxContainer/MyTurnLabel.text = "It is your turn!"
@@ -590,11 +577,18 @@ func endGame():
 	code = 0
 	$Homepage/CodeTextBox.text = ""
 	
+	$myTimer.stop()
+	$oppsTimer.stop()
+	
 	homepage._ready()	
 	
 @rpc("any_peer")
 func oppDisconnected():
 	#trigger end of game and error message
+	$myTimer.stop()
+	$oppsTimer.stop()
+	$GameControls/PanelContainer/VBoxContainer/LeaveButton.visible = false
+	
 	print("opp disconnected")
 	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "Your Opponent Has Been Disconnected"	
 	endGameDisplayVisible(true)
@@ -625,6 +619,10 @@ func theUsernamePasser(theName):
 	
 
 func _on_leave_button_pressed() -> void:
+	#need to verify that opponent hasn't just left the game
+	#if we both leave at the same time the server breaks
+	$myTimer.stop()
+	$oppsTimer.stop()
 	loadingScreenVisible(false)
 	rpc_id(1, "leftGame", myID, code)
 	endGame()
@@ -894,17 +892,8 @@ func checkPromotion(square, pieceInfo):
 					
 
 func setGameTime(selectedTime): 
-	match selectedTime:
-		0: 	
-			gameTime = 10
-		1: 	
-			gameTime = 5
-		2: 	
-			gameTime = 3			
-		3: 	
-			gameTime = INF
-			
-			
+	gameTime = selectedTime
+
 
 func _on_my_timer_timeout() -> void:
 	$EndGameDisplay/PanelContainer/VBoxContainer/Label.text = "You have ran out of time"	
@@ -918,22 +907,25 @@ func _on_opps_timer_timeout() -> void:
 	
 @rpc("any_peer")
 func recieveTime(time):
+	print("in receive time")
 	gameTime = time
 	$myTimer.setGameTime(gameTime)
 	$oppsTimer.setGameTime(gameTime)
 	
 func flipTimers(): 
 	if myTurn:
-		$myTimer.setMyTurn(true)
-		$myTimer.start()
-		
+		$oppsTimer.set_paused(true)
 		$oppsTimer.setMyTurn(false)
-		$oppsTimer.is_paused()
+		
+		$myTimer.setMyTurn(true)
+		$myTimer.set_paused(false)
+		
+
+
 	else:
-		$myTimer.is_paused()
+		$myTimer.set_paused(true)
 		$myTimer.setMyTurn(false)
 		
-		$oppsTimer.start()
 		$oppsTimer.setMyTurn(true)
-	
+		$oppsTimer.set_paused(false)
 	
