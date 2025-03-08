@@ -152,6 +152,7 @@ func startGame():
 		$Camera3D.position.z = -7.564
 		$Camera3D.rotate_y(deg_to_rad(180))
 
+
 	
 	flipTimers()
 
@@ -587,6 +588,7 @@ func endGame():
 	Global.deletePieces()
 	oppId = 0
 	code = 0
+	$Homepage/CodeTextBox.text = ""
 	
 	homepage._ready()	
 	
