@@ -413,6 +413,15 @@ text = "Chats Will Appear Here"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="GameCommunication" type="Label" parent="GameControls"]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 88.0
+theme_override_font_sizes/font_size = 40
+text = "In Check"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="EndGameDisplay" type="NinePatchRect" parent="."]
 anchors_preset = 8
 anchor_left = 0.5

@@ -119,20 +119,3 @@ func get_squares_to_king(squareKingIsOn):
 				squares_to_king = []
 		Global.PIECE_TYPE.king:
 				squares_to_king = []
-
-#func get_squares_between(squareDefendedPieceisOn):
-	#match type:		
-		#Global.PIECE_TYPE.bishop:
-			#squares_to_king = PieceMovements.bishopK(is_white, square, squareKingIsOn)
-		#Global.PIECE_TYPE.rook:
-			#squares_to_king = PieceMovements.rookK(is_white, square, squareKingIsOn)
-		#Global.PIECE_TYPE.queen:
-			#squares_to_king = PieceMovements.queenK(is_white, square, squareKingIsOn)
-			#
-		##other pieces can't be blocked so return [] 
-		#Global.PIECE_TYPE.pawn:
-				#squares_to_king = []
-		#Global.PIECE_TYPE.knight:
-				#squares_to_king = []
-		#Global.PIECE_TYPE.king:
-				#squares_to_king = []
